@@ -3,6 +3,7 @@
 
 import math
 
+#Equations for the compliances
 class AttachedPart:
     def __init__(self,E, t, Dfo, Dfi):
         self.E = E
@@ -40,8 +41,13 @@ class Fastener:
         delta += self.Ln_sub / (self.E * A_shank)
         return delta
     
+
+#force ratio equation
 def force_ratio(delta_a, delta_b):
     return delta_b / (delta_a + delta_b)
+
+
+#Main function, incomplete
 
 # def main():
 #     # Example values
@@ -72,5 +78,7 @@ def force_ratio(delta_a, delta_b):
 #     print(f"Fastener Compliance: {delta_b:.6e} m/N")
 #     print(f"Force Ratio (Fastener to Total): {ratio:.6f}")
 
+
+#Activate Main function
 if __name__ == "__main__":
     main()
