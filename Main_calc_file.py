@@ -31,3 +31,24 @@ print(t/E,"In arbitrary units")
 #----------------------------
 #Example section - ending
 #---------------------------
+
+
+#----------------------------
+#4.1 section - beginning
+#---------------------------
+array_width = 1.303840481
+array_length = 1.303840481
+
+sc_moment_arm = [0.50722, 1, 0.0187]
+assembly_loads = []
+torques = [0.0019215, 0.0018200, 0.000275913]
+array_forces = map(zip(torques, sc_moment_arm)torques, lambda x: x[1]/x[2])
+
+
+# f_z = 6.5*g
+
+
+#----------------------------
+#4.1 section - ending
+#---------------------------
+
