@@ -104,13 +104,14 @@ def positions_cg(masses, positions, D2):
 
 def check_spacing_constraint(positions, D2):#checking constraints for the spacing of the fasteners
     positions = np.array(positions, dtype=float)
-    min_dist = 0.5 * D2
+    min_dist = 2 * D2
+    max_dist = 3 * D2
     n = len(positions)
     for i in range(n):
         for j in range(i+1, n):
-            dx = abs(positions[i][0] - positions[j][0])
+            
             dz = abs(positions[i][2] - positions[j][2])
-            if dx < min_dist or dz < min_dist:
+            if  dz < min_dist  or dz > max_dist:
                 return False
     return True
     
@@ -159,6 +160,7 @@ for LC in Total_load_cases:
         print("Force distribution correct.")
     
     print(f"Fx: {Total_Fx}, Fy: {Total_Fy}, Fz: {Total_Fz}, Mx: {Total_Mx}, My: {Total_My}, Mz: {Total_Mz}")
+
 
 
 
