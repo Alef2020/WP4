@@ -1,7 +1,7 @@
 import math
 
 class MaterialProperties(): #class for material properties
-    def __init__(self, E = [0,0,0],  rho = 0, strength, shear): #more properties could be added is needed
+    def __init__(self, E = [0,0,0],  rho = 0, strength = 0, shear = 0): #more properties could be added is needed
         self.Youngs_modulus = E
         self.shear_strengh = shear
         self.density = rho
@@ -38,7 +38,7 @@ class Fastener(): #Define one fastener with its properties and load cases
         self.load_cases = load_cases
 
 class design_Configuration(): #Define one design configuration
-    def __init__(self, fastener_positions, load_cases = [], t_1 = 3, t_2 = 4, t_3 = 6, fastener_config = Fastener_Configuration):
+    def __init__(self, fastener_positions, load_cases = [], t_1 = 3, t_2 = 4, t_3 = 6, fastener_config = Fastener_Configuration): #any default values are bs, will be fixed with the first iteration
         #other parameters
         self.t_1 = t_1
         self.t_2 = t_2
@@ -53,13 +53,14 @@ class design_Configuration(): #Define one design configuration
         self.A_i = math.pi*(self.fastener_config.d_o/2)**2
 
         self.FastenerList = [] #list of fasteners objects containing material properties, dimensions
+        
         for Fastener_pos in self.fastener_positions:
             self.area_moment[0] += self.A_i*Fastener_pos[0]**2 #approximation of 2nd moment of area (x-axis)
             self.area_moment[1] += self.A_i*(Fastener_pos[0]**2 + Fastener_pos[2]**2) #approximation of polar moment of inertia (y-axis))
             self.area_moment[2] += self.A_i*Fastener_pos[2]**2 #approximation of 2nd moment of area around z-axis  
             self.FastenerList.append(Fastener(Fastener_pos ,self.fastener_config))
         
-        for f in self.FastenerList: 
+        for f in self.FastenerList: #This part approximates an area moment of inertia
             local_load_cases = []
             for LC in self.load_cases: #This loop goes through each loadcase for the entire structure, calculates the forces on each fastener and stores them in a fastener object
                 F_p = Load_Case(0,0,0,0,0,0)
@@ -87,7 +88,7 @@ Fastener_positions = [ #defines the positions of the fasteners relative to teh c
     [1,0,1]
 ]
 
-#Set design parameter, (change standard values if wanted)
+#Set design parameters, (change standard values if wanted)
 example_design = design_Configuration(Fastener_positions, Total_load_cases, fastener_config = M5_steel)
 
 
@@ -101,7 +102,6 @@ for LC in Total_load_cases:
     Total_My = 0 
     Total_Mz = 0
     for fastener in example_design.FastenerList:
-        print(fastener.position)
         index = Total_load_cases.index(LC) #have to check the signs, also some terms may be removed since pos[1] = 0 always
         Total_Fx += fastener.load_cases[index].Force_X
         Total_Fy += fastener.load_cases[index].Force_Y
@@ -116,7 +116,5 @@ for LC in Total_load_cases:
         print("Force distribution correct.")
     
     print(f"Fx: {Total_Fx}, Fy: {Total_Fy}, Fz: {Total_Fz}, Mx: {Total_Mx}, My: {Total_My}, Mz: {Total_Mz}")
-
-    FastnerList.append(fastener)
 
 
