@@ -80,6 +80,49 @@ class design_Configuration(): #Define one design configuration
 #define loadcases to be analysed
 Total_load_cases = [Load_Case(3,4,2,3,6,1), Load_Case(9,2,4,1,3,4)] #should eventually be a list of all possible load cases from 4.1
 
+
+#Part of finding the center of gravity of fasteners and the relative coordinates of each fastener to the center of gravity
+#origin set as the center of the slag
+#can be only used for identical fasteners, spacing of fasteners does not have to be uniform
+import numpy as np
+
+def center_of_gravity(masses,positions):
+    masses = np.array(masses, dtype=float)
+    positions = np.array(positions, dtype=float)
+    weighted_positions = masses[:,None]*positions
+    cg = weighted_positions.sum(axis=0)/masses.sum()
+    return cg
+    
+def positions_cg(masses, positions, D2):
+    if not check_spacing_constraint(positions, D2):
+        raise ValueError("spacing of fasteners are irrelevant")
+        
+    positions = np.array(positions, dtype=float)
+    cg = center_of_gravity(masses,positions)
+    rel_positions = positions -cg
+    return cg, rel_positions
+
+def check_spacing_constraint(positions, D2):#checking constraints for the spacing of the fasteners
+    positions = np.array(positions, dtype=float)
+    min_dist = 0.5 * D2
+    n = len(positions)
+    for i in range(n):
+        for j in range(i+1, n):
+            dx = abs(positions[i][0] - positions[j][0])
+            dz = abs(positions[i][2] - positions[j][2])
+            if dx < min_dist or dz < min_dist:
+                return False
+    return True
+    
+#Manual Inputs    
+D2 = 
+masses = []
+positions = []
+
+cg, rel_positions = positions_cg(masses, positions, D2)
+
+
+
 #Define Fastener position
 Fastener_positions = [ #defines the positions of the fasteners relative to teh c.g. origin ... Square pattern for testing
     [-1,0,-1],
@@ -116,5 +159,6 @@ for LC in Total_load_cases:
         print("Force distribution correct.")
     
     print(f"Fx: {Total_Fx}, Fy: {Total_Fy}, Fz: {Total_Fz}, Mx: {Total_Mx}, My: {Total_My}, Mz: {Total_Mz}")
+
 
 
