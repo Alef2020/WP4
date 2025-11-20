@@ -1,115 +1,102 @@
-# heat stress calculator
-# assumes linear heat gradient
-# 6126324
-
 import math
-# thermal stresses
-# requires compliance of lug and of bolt from 4.10
-# requires stiffness area of bolt from 4.3
-#placeholder variables used here:
-compliance_lug = 1
-compliance_bolt = 1
 
+# ===============================
+# Assumed material and geometry
+# ===============================
+thermal_coefficient_lug = 2e-5  # 1/K
+thermal_coefficient_bolt = 1e-5  # 1/K
+fastener_youngs_modulus = 50e9  # Pa
+backplate_youngs_modulus = 50e9  # Pa
+skin_youngs_modulus = 50e9  # Pa
 
-# finding thermal changes
+backplate_thickness = 0.01  # m
+skin_thickness = 0.01  # m
+bolt_head_radius = 0.01  # m
+hole_diameter = 0.01  # m
+bolt_distance_to_edge = 0.2  # m
 
+total_thickness = backplate_thickness + skin_thickness
 
-# defining variables
+# Fastener geometry: [length, radius]
+fastener_geometry_list = [
+    [0.01, 0.003],
+    [0.02, 0.002],
+    [0.01, 0.003]
+]
 
-# known variables
-solar_panel_max_temperature = 453
-solar_panel_min_temperature = 408
+integration_steps = 100000  # numerical integration steps
 
-inside_wall_max_temperature = 298
-inside_wall_min_temperature = 263
+# ===============================
+# Temperature conditions
+# ===============================
+assembly_temperature = 288  # K
+min_temp = 263  # K
+max_temp = 298  # K
 
-# assumed variables
+delta_t_list = []
+delta_t_list.append(min_temp - assembly_temperature)
+delta_t_list.append(max_temp - assembly_temperature)
 
-inner_diameter = 0.01
+# ===============================
+# Compliance of fastener
+# ===============================
+compliance_fastener = 0
+for fastener in fastener_geometry_list:
+    length = fastener[0]
+    radius = fastener[1]
+    area = math.pi * radius ** 2
+    compliance_fastener += length / (fastener_youngs_modulus * area)
 
-thermal_expansion_coefficient_fastener = 1e-6
-thermal_expansion_coefficient_clamped_part = 1.5e-6
+# ===============================
+# Compliance of clamped part (ESA method)
+# ===============================
+# Compression cone half-angle (tan θ)
+compression_cone_half_angle = 0.362
+compression_cone_half_angle += 0.032 * math.log(total_thickness / bolt_head_radius)
+compression_cone_half_angle += 0.153 * math.log(bolt_distance_to_edge / (2 * bolt_head_radius))
 
-younghs_modulus_bolt = 50e9
-younghs_modulus_backplate = 70e9
+w = 1  # 1 for nut-tightened joints, 2 for threaded-hole joints
 
-outer_diameter = 0.3
-inner_diameter = 0.2
+# Limit radius of compression cone
+compression_cone_limit_radius = bolt_head_radius + 0.5 * w * total_thickness * compression_cone_half_angle
+if compression_cone_limit_radius > bolt_distance_to_edge:
+    compression_cone_limit_radius = bolt_distance_to_edge
 
-t_3 = 0.01
-t_2 = 0.01
+# Numerical integration for clamped part compliance
+step_size = total_thickness / integration_steps
+compliance_clamped_part = 0
 
-total_thickness_of_attachment = 0.03
+for i in range(integration_steps):
+    z = i * step_size
 
-solar_panel_beam_length = 0.1
+    # Determine radius at this z
+    mid_thickness = total_thickness / 2
+    if z <= mid_thickness:
+        r = bolt_head_radius + (2 * (compression_cone_limit_radius - bolt_head_radius) / total_thickness) * z
+    else:
+        r = 2 * compression_cone_limit_radius - bolt_head_radius + (
+                    2 * (bolt_head_radius - compression_cone_limit_radius) / total_thickness) * z
 
+    if r > bolt_distance_to_edge:
+        r = bolt_distance_to_edge
 
-neutral_temperature = 288
+    # Determine Young's modulus at this z
+    if z <= backplate_thickness:
+        E = backplate_youngs_modulus
+    else:
+        E = skin_youngs_modulus
 
+    # Increment compliance
+    compliance_clamped_part += step_size / (E * math.pi * r ** 2)
 
+# ===============================
+# Calculate forces on fasteners
+# ===============================
+total_bolt_length = 0
+for fastener in fastener_geometry_list:
+    total_bolt_length += fastener[0]
 
-
-
-stiffness_area = math.pi * (inner_diameter/2)**2
-
-
-
-
-
-
-# defining functions
-def find_difference(a,b): # works
-    return abs(a-b)
-def find_total_length(): # works
-    return t_3 +t_2 + total_thickness_of_attachment + solar_panel_beam_length
-def find_temperature(min_temperature, max_temperature, position):
-    return max_temperature - find_difference(min_temperature, max_temperature)*position/find_total_length()
-
-def show_only_outlying_values(input_list):
-    output_dict = {}
-    if min(input_list) < 0:
-        output_dict['Minimum value: '] = min(input_list)
-    if max(input_list) > 0:
-        output_dict['Maximum values: '] = max(input_list)
-    return output_dict
-
-# finding the 4 linearly interpolated temperatures. Any possible temperature will be between these values.
-temperature_1 = find_temperature(inside_wall_max_temperature, solar_panel_max_temperature, solar_panel_beam_length)
-temperature_2 = find_temperature(inside_wall_min_temperature, solar_panel_min_temperature, solar_panel_beam_length)
-temperature_3 = find_temperature(inside_wall_min_temperature, solar_panel_max_temperature, solar_panel_beam_length)
-temperature_4 = find_temperature(inside_wall_max_temperature, solar_panel_min_temperature, solar_panel_beam_length)
-
-# finding the maximum and minimum possible temperature
-max_temperature = max(temperature_1, temperature_2, temperature_3, temperature_4)
-min_temperature = min(temperature_1, temperature_2, temperature_3, temperature_4)
-
-# finding the highest and lowest(most negative) possible temperature differences
-highest_deltaT = max_temperature-neutral_temperature
-lowest_deltaT = min_temperature-neutral_temperature
-deltaT = [highest_deltaT, lowest_deltaT]
-
-# finding the outlying values
-deltaT = show_only_outlying_values(deltaT)
-
-#finding max thermal stresses
-
-#compliance_lug = 4*t_2/(younghs_modulus_backplate * math.pi * (outer_diameter**2-inner_diameter**2))
-
-force_ratio = compliance_lug/(compliance_bolt+compliance_lug) # CHECK THIS IS NOT INVERTED
-
-thermal_force_max = (thermal_expansion_coefficient_clamped_part - thermal_expansion_coefficient_fastener) * deltaT.get(
-    'Maximum values: ') * younghs_modulus_bolt * stiffness_area * (1 - force_ratio)
-
-
-
-#print the max and min values
-try:
-    thermal_force_max = (thermal_expansion_coefficient_clamped_part-thermal_expansion_coefficient_fastener) * deltaT.get('Maximum values: ') * younghs_modulus_bolt * stiffness_area * (1-force_ratio)
-    print("Max force: ", thermal_force_max)
-except TypeError:
-    pass
-try:
-    thermal_force_min = (thermal_expansion_coefficient_clamped_part-thermal_expansion_coefficient_fastener) * deltaT.get('Minimum values: ') * younghs_modulus_bolt * stiffness_area * (1-force_ratio)
-    print("Min force: ", thermal_force_min)
-except TypeError:
-    pass
+for delta_t in delta_t_list:
+    force = total_bolt_length * (thermal_coefficient_lug - thermal_coefficient_bolt) * delta_t
+    force = force / (compliance_fastener + compliance_clamped_part)
+    print("ΔT = ", delta_t, "K, Force = ", force, "N")
