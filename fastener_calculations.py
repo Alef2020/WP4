@@ -94,9 +94,7 @@ class design_Configuration(): #Define one design configuration
 Total_load_cases = [Load_Case(3,4,2,3,6,1), Load_Case(9,2,4,1,3,4)] #should eventually be a list of all possible load cases from 4.1
 
 
-#Part of finding the center of gravity of fasteners and the relative coordinates of each fastener to the center of gravity
-#origin set as the center of the slag
-#can be only used for identical fasteners, spacing of fasteners does not have to be uniform
+
 import numpy as np
 
 #function of checking the spacing constraint of fasteners
@@ -113,7 +111,7 @@ def check_spacing_constraint(fastener_positions, D2):#checking constraints for t
                 return False
     return True
        
-def calculating_mass:
+
 
 
 
@@ -154,6 +152,7 @@ for width in range(10, 20, 0.1):
         design_option = design_Configuration(fastener_positions, Total_load_cases, fastener_config = M5_steel)
         if pull_through_check(design_option):
             print(f"Design passes for width: {width} cm and height: {height} cm")
+
 
 
 
