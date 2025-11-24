@@ -4,16 +4,15 @@ import numpy as np
 
 #Resultant Force
 
-class bearingforce:
-    def __init__(self, fx, fy, fz):
-        self.fx = fx
-        self.fy = fy
-        self.fz = fz
+class FastenerLoad:
+    def __init__(self, Fx, Fz, FM):
+        self.Fx = Fx
+        self.Fz = Fz
+        self.FM = FM
 
-    def resultant_force(self):
-        P1 = math.sqrt(self.fx**2 + self.fy**2 + self.fz**2)
+    def total_inplane_load(self):
+        P1 = math.sqrt(self.Fx**2 + self.Fz**2 + self.FM**2)
         return P1
-    
 
 #Does it meet the bearing failure criteria?
 class bearingfailure:
