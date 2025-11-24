@@ -99,24 +99,9 @@ Total_load_cases = [Load_Case(3,4,2,3,6,1), Load_Case(9,2,4,1,3,4)] #should even
 #can be only used for identical fasteners, spacing of fasteners does not have to be uniform
 import numpy as np
 
-def center_of_gravity(masses,positions):
-    masses = np.array(masses, dtype=float)
-    positions = np.array(positions, dtype=float)
-    weighted_positions = masses[:,None]*positions
-    cg = weighted_positions.sum(axis=0)/masses.sum()
-    return cg
-    
-def positions_cg(masses, positions, D2):
-    if not check_spacing_constraint(positions, D2):
-        raise ValueError("spacing of fasteners are irrelevant")
-        
-    positions = np.array(positions, dtype=float)
-    cg = center_of_gravity(masses,positions)
-    rel_positions = positions -cg
-    return cg, rel_positions
-
-def check_spacing_constraint(positions, D2):#checking constraints for the spacing of the fasteners
-    positions = np.array(positions, dtype=float)
+#function of checking the spacing constraint of fasteners
+def check_spacing_constraint(fastener_positions, D2):#checking constraints for the spacing of the fasteners
+    positions = np.array(fastener_positions, dtype=float)
     min_dist = 2 * D2
     max_dist = 3 * D2
     n = len(positions)
@@ -127,13 +112,8 @@ def check_spacing_constraint(positions, D2):#checking constraints for the spacin
             if  dz < min_dist  or dz > max_dist:
                 return False
     return True
-    
-#Manual Inputs    
-D2 = 
-masses = []
-positions = []
-
-cg, rel_positions = positions_cg(masses, positions, D2)
+       
+def calculating_mass:
 
 
 
@@ -174,6 +154,7 @@ for width in range(10, 20, 0.1):
         design_option = design_Configuration(fastener_positions, Total_load_cases, fastener_config = M5_steel)
         if pull_through_check(design_option):
             print(f"Design passes for width: {width} cm and height: {height} cm")
+
 
 
 
