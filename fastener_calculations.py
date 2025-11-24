@@ -154,11 +154,3 @@ for width in range(10, 20, 0.1):
             print(f"Design passes for width: {width} cm and height: {height} cm")
 
 
-
-
-
-
-
-
-
-
