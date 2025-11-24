@@ -151,7 +151,7 @@ def K_ty(curve, Av_Abr):
 
 
 
-def load_check(material, curve_Kt, curve_Kty,flanges,  c, F_xx, F_yy, F_zz, M_xx, M_yy, M_zz, W, D_1, D_p, t_1, e, l):
+def load_check(material, curve_Kt,flanges,  c, F_xx, F_yy, F_zz, M_xx, M_yy, M_zz, W, D_1, D_p, t_1, e, l, curve_Kty = "Curve 3"):
 
     Av = 6/(3/(0.5*t_1*(W-D_1*np.sin(np.pi/4)))+1/(0.5*t_1*(W-D_1*np.sin(np.pi/4)))+1/(0.5*t_1*(W-D_1))+1*((e-D_1/2)*t_1))
     ratio = Av/(D_p*t_1) # area ratio
@@ -224,7 +224,7 @@ c = 0.6 #reduction due to ultimate instead or yield (tension)
 
 
 
-a = load_check(material, curve_Kt, curve_Kty,flanges,  c, F_x, F_y, F_z, M_x, M_y, M_z, W, D_1, D_p, t_1, e, l)
+a = load_check(material, curve_Kt,flanges,  c, F_x, F_y, F_z, M_x, M_y, M_z, W, D_1, D_p, t_1, e, l, curve_Kty)
 
 print(a)
 
