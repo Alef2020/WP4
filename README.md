@@ -5,7 +5,7 @@ It does not matter what editor you use for your code, GitHub only cares about th
 
 
 
-Instructions to use my dogshit (Lug):
+Instructions to use my dogshit code (Lug):
 
 
 Using the table below specify which graphe you want to use for curve_Kt, write it as "Curve 1" as example.
