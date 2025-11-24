@@ -149,30 +149,32 @@ Fastener_positions = [ #defines the positions of the fasteners relative to teh c
 example_design = design_Configuration(Fastener_positions, Total_load_cases, fastener_config = M5_steel)
 
 
-#This program checks if the forces in the design actually add up to the total load case, but any function can be made to check for certain conditions
-for LC in Total_load_cases:
-    print("Total forces for load case:")
-    Total_Fx = 0
-    Total_Fy = 0
-    Total_Fz = 0
-    Total_Mx = 0
-    Total_My = 0 
-    Total_Mz = 0
-    for fastener in example_design.FastenerList:
-        index = Total_load_cases.index(LC) #have to check the signs, also some terms may be removed since pos[1] = 0 always
-        Total_Fx += fastener.load_cases[index].Force_X
-        Total_Fy += fastener.load_cases[index].Force_Y
-        Total_Fz += fastener.load_cases[index].Force_Z
-        Total_Mx += fastener.load_cases[index].Force_Z * fastener.position[1] - fastener.load_cases[index].Force_Y * fastener.position[2]
-        Total_My += (fastener.load_cases[index].Force_X * fastener.position[2] - fastener.load_cases[index].Force_Z * fastener.position[0])/2 # I lost track of why this needs to be devided by 2 but it works ? 
-        Total_Mz += fastener.load_cases[index].Force_Y * fastener.position[0] - fastener.load_cases[index].Force_Z * fastener.position[1]
-    
-    if abs(Total_Fx - LC.Force_X) > 1e-6 or abs(Total_Fy - LC.Force_Y) > 1e-6 or abs(Total_Fz - LC.Force_Z) > 1e-6:
-        print("Error in force distribution!") # accounts for floating point errors
-    else:
-        print("Force distribution correct.")
-    
-    print(f"Fx: {Total_Fx}, Fy: {Total_Fy}, Fz: {Total_Fz}, Mx: {Total_Mx}, My: {Total_My}, Mz: {Total_Mz}")
+def pull_through_check(design_option):
+            for fastener in design_option.FastenerList:
+                for LC in fastener.load_cases:
+                    A_bearing = math.pi * (design_option.fastener_config.head_diameter**2 - design_option.fastener_config.d_o**2) /4
+                    bearing_stress = LC.Force_Y / A_bearing
+                    if bearing_stress > design_option.fastener_config.material.stress_yield:
+                        return False
+            return True
+
+
+for width in range(10, 20, 0.1):
+    for height in range(10, 20, 0.1):
+        e =0.3
+        fastener_positions = [
+            [ width/2-e, 0,  height/2-e],
+            [-width/2+e, 0,  height/2-e],
+            [ width/2-e, 0, -height/2+e],
+            [-width/2+e, 0, -height/2+e],
+            [0, 0, -height/2+e],
+            [0, 0, -height/2+e]
+        ]
+
+        design_option = design_Configuration(fastener_positions, Total_load_cases, fastener_config = M5_steel)
+        if pull_through_check(design_option):
+            print(f"Design passes for width: {width} cm and height: {height} cm")
+
 
 
 
