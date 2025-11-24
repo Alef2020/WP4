@@ -175,9 +175,3 @@ for width in range(10, 20, 0.1):
         if pull_through_check(design_option):
             print(f"Design passes for width: {width} cm and height: {height} cm")
 
-
-
-
-
-
-
