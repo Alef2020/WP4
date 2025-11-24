@@ -150,24 +150,53 @@ def K_ty(curve, Av_Abr):
 
 
 
-def load_check():
+
+def load_check(material, curve_Kt, curve_Kty,flanges,  c, F_xx, F_yy, F_zz, M_xx, M_yy, M_zz, W, D_1, D_p, t_1, e, l):
+
+    Av = 6/(3/(0.5*t_1*(W-D_1*np.sin(np.pi/4)))+1/(0.5*t_1*(W-D_1*np.sin(np.pi/4)))+1/(0.5*t_1*(W-D_1))+1*((e-D_1/2)*t_1))
+    ratio = Av/(D_p*t_1) # area ratio
+
+    W_D = W/D_1
+    t_D = t_1/D_1
+    e_D = e/D_1
+
+    F_tu = material_properties[material]["sigma_u"] #ultimate
+    F_ty = material_properties[material]["sigma_y"] #yield
+
+    F_a = F_xx/flanges #forces per flange (x=a, y=b, z=c)
+    F_b = F_yy/flanges
+    F_c = F_zz/flanges
+
+    M_a = F_c*l + M_xx/flanges #moment per flange
+    M_c = F_a*l + M_zz/flanges
+
+    I_xx = (1/12)*t_1*(W**3) #moment of Inertia
+    I_zz = (1/12)*W*(t_1**3)
     
-    sigma_max_root = F_y/(W*t_1) + (M_x*(W/2))/I_xx + (M_z*(t_1/2))/I_zz #max stress at the root
+    
+    sigma_max_root = F_b/(W*t_1) + (M_a*(W/2))/I_xx + (M_c*(t_1/2))/I_zz #max stress at the root
     P_tu = Kt( curve_Kt, W_D)*F_tu*t_1*(W-D_1)*c #force it can take per failure condition
     P_Bry = K_Bry(t_D, e_D)*F_tu*D_p*t_1
     P_ty = K_ty(curve_Kty ,ratio)*F_ty*D_p*t_1
 
-    return sigma_max_root, P_tu, P_Bry, P_ty
+    if sigma_max_root < F_ty and P_tu > F_b and P_Bry > F_b and P_ty > F_c:
+        conclusion = "pass"
+    else:
+        conclusion = "fail"
+
+    return conclusion
     
 
-#Forces per lug:  
+#Forces per lug:
 
 F_x = 15000 #N
 F_y = 15000 #N
 F_z = 15000 #N
 M_x = 15 #Nm
+M_y = 0 #Nm
+M_z = 15 #Nm
 
-MoS = 0.15 #margin of safety
+
 
 #Geometry m
 
@@ -191,57 +220,17 @@ curve_Kty = "Curve 3"#Change only the number
 
 c = 0.6 #reduction due to ultimate instead or yield (tension)
 
-#Ratio
-
-Av = 6/(3/(0.5*t_1*(W-D_1*np.sin(np.pi/4)))+1/(0.5*t_1*(W-D_1*np.sin(np.pi/4)))+1/(0.5*t_1*(W-D_1))+1*((e-D_1/2)*t_1))
-ratio = Av/(D_p*t_1) # area ratio
-
-W_D = W/D_1
-t_D = t_1/D_1
-e_D = e/D_1
 
 
 
 
-#
-#Calculations
-#
+a = load_check(material, curve_Kt, curve_Kty,flanges,  c, F_x, F_y, F_z, M_x, M_y, M_z, W, D_1, D_p, t_1, e, l)
 
-F_tu = material_properties[material]["sigma_u"] #ultimate
-F_ty = material_properties[material]["sigma_y"] #yield
+print(a)
 
-F_x = (1+MoS)*F_x/flanges #forces per flange
-F_y = (1+MoS)*F_y/flanges
-F_z = (1+MoS)*F_z/flanges
 
-M_x = F_z*l + M_x/flanges #moment per flange
-M_z = F_x*l
 
-I_xx = (1/12)*t_1*(W**3) #moment of Inertia
-I_zz = (1/12)*W*(t_1**3)
-    
-sigma_max_root, P_tu, P_Bry, P_ty = load_check()
 
-if P_tu < F_y:
-    print("The tensile load carying capacity is not large enough!")
-    print("Try increasing the thickness or the width.")
-
-if P_tu >= F_y:
-    print("The tensile load carying capacity is sufficient at:", P_tu)
-if P_Bry < F_y:
-    print("The shear load carying capacity is not large enough!")
-    print("Try increasing the thickness or the bolth diameter.")
-if P_Bry >= F_y:
-    print("The shear load carying capacity is sufficient at:", P_Bry)
-if P_ty < F_z:
-    print("The transverse load carying capacity is not large enough!")
-    print("Try increasing the bolt diameter or the thickness.")
-if P_ty >= F_z:
-    print("The transverse load carying capacity is sufficient at:", P_ty)
-if sigma_max_root > F_ty:
-    print("The yield stress is exceeded at the root!")
-if sigma_max_root <= F_ty:
-    print("The maximum stress at the root does not exceed yield:", sigma_max_root)
 
 
 
