@@ -179,12 +179,15 @@ def load_check(material, curve_Kt,flanges,  c, F_xx, F_yy, F_zz, M_xx, M_yy, M_z
     P_Bry = K_Bry(t_D, e_D)*F_tu*D_p*t_1
     P_ty = K_ty(curve_Kty ,ratio)*F_ty*D_p*t_1
 
-    if sigma_max_root < F_ty and P_tu > F_b and P_Bry > F_b and P_ty > F_c:
-        conclusion = "pass"
-    else:
-        conclusion = "fail"
 
-    return conclusion
+    return F_ty-sigma_max_root, P_tu-F_b, P_bry-F_b, P_ty-F_c
+
+def mass_flange(material, W, D_1, t_1, l, e):
+
+    V = W*l*t_1 + (1/2)*np.pi*(e**2)*t_1 - np.pi*(D_1**2)*t_1
+    m = V*material_properties[material]["density"]
+
+    return m
     
 
 #Forces per lug:
@@ -224,9 +227,7 @@ c = 0.6 #reduction due to ultimate instead or yield (tension)
 
 
 
-a = load_check(material, curve_Kt,flanges,  c, F_x, F_y, F_z, M_x, M_y, M_z, W, D_1, D_p, t_1, e, l, curve_Kty)
 
-print(a)
 
 
 
