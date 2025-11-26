@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 class Load_Case(): #Define one load, this is more for clarity, it could also just be an array
     def __init__(self, Fx = 0, Fy = 0, Fz = 0, Mx = 0, My = 0, Mz = 0):
@@ -15,17 +16,21 @@ class MaterialProperties(): #class for material properties
         self.density = rho
         self.stress_yield = strength
         self.shear_strenght = shear if shear != 0 else 1.5*self.stress_yield**2 # weird relation as given in WP4, I think its not right yet
+        self.specific_cost = 0.01 #assumed cost per kg, could be changed based on material
 
 #example materials
 Alumunium = MaterialProperties(E = 70e9, rho = 2700) #example material
 Steel = MaterialProperties(E = 200e9, rho = 7850) #example material  
 
 class Fastener_Configuration(): #Define one design configuration
-    def __init__(self, d_h = 0.0075, d_f = 0.007, d_o = 0.004, material = Steel): #standard M4-steel bolt
-        self.fastener_diameter = d_f
-        self.head_diameter = d_h
-        self.d_o = d_o
+    def __init__(self, Head_diameter = 0.0075, shank_diameter = 0.007, Nut_diameter = 0.004, Length = 1, material = Steel, mass = 0): #standard M4-steel bolt
+        self.d_s = shank_diameter
+        self.d_h = Head_diameter
+        self.d_n = Nut_diameter
+        self.L = Length
         self.material = material
+        self.mass = mass if mass != 0 else 1.3*(math.pi*(self.d_s/2)**2)*material.density #approximate mass based on volume of cylinder of 3cm length or given mass
+        self.cost = 0.5 #assumed cost per fastener, could be changed based on material and size
 
 #example fastener config
 M5_steel = Fastener_Configuration(0.0083, 0.0075, 0.005, Steel)
@@ -38,20 +43,34 @@ class Fastener(): #Define one fastener with its properties and load cases
         self.load_cases = load_cases
 
 class design_Configuration(): #Define one design configuration
-    def __init__(self, fastener_positions, load_cases = [], t_1 = 3, t_2 = 4, t_3 = 6, fastener_config = Fastener_Configuration):
-        #other parameters these can be changed for other purposes
-        self.t_1 = t_1
-        self.t_2 = t_2
-        self.t_3 = t_3
+    def __init__(self, fastener_positions, load_cases = [], width = 3, height= 2, t_2 = 4, t_3 = 6, Material = Steel, SC_material = Alumunium, fastener_config = Fastener_Configuration):
+        #global design parameters
         self.load_cases = load_cases
+        
+        #Lug plate parameters
+        self.t_2 = t_2 #thickness of lug plate
+        self.t_3 = t_3 #thickness of mounting plate
+        self.lug_width = width #width and height of lug plate
+        self.lug_height = height #width and height of lug plate (NOT THICKNESS)
+        self.material = Material #material of lug plate
+        self.material_wall = SC_material #material of spacecraft wall, could be changed for different
 
         #fastener design
         self.fastener_positions = fastener_positions
         self.n_f = len(self.fastener_positions)
         self.area_moment = [0,0,0]
         self.fastener_config = fastener_config
-        self.A_i = math.pi*(self.fastener_config.d_o/2)**2
+        self.A_i = math.pi*(self.fastener_config.d_s/2)**2
 
+        e = 0.3 #distance from edge to center of fastener should be defined based on fastener size
+        fastener_positions = [
+            [ self.width/2-e, 0,  self.height/2-e],
+            [-self.width/2+e, 0,  self.height/2-e],
+            [ self.width/2-e, 0, -self.height/2+e],
+            [-self.width/2+e, 0, -self.height/2+e],
+            [0, 0, -self.height/2+e],
+            [0, 0, -self.height/2+e]
+        ]
         #This section of the code calculates the c.g. of the fastener pattern and ajust the positions to make that the origin
         CG = [0,0.0]
         CG[0] = sum([pos[0] for pos in self.fastener_positions])/self.n_f #can prob be done better with np
@@ -83,74 +102,13 @@ class design_Configuration(): #Define one design configuration
                 local_load_cases.append(F_p) # Note that there are no moments on the fastener itself in this simple model
             f.load_cases = local_load_cases
 
-
-
-###
-#Example program using the classes above:
-###
-
-
-#define loadcases to be analysed
-Total_load_cases = [Load_Case(3,4,2,3,6,1), Load_Case(9,2,4,1,3,4)] #should eventually be a list of all possible load cases from 4.1
-
-
-
-import numpy as np
-
-#function of checking the spacing constraint of fasteners
-def check_spacing_constraint(fastener_positions, D2):#checking constraints for the spacing of the fasteners
-    positions = np.array(fastener_positions, dtype=float)
-    min_dist = 2 * D2
-    max_dist = 3 * D2
-    n = len(positions)
-    for i in range(n):
-        for j in range(i+1, n):
-            
-            dz = abs(positions[i][2] - positions[j][2])
-            if  dz < min_dist  or dz > max_dist:
-                return False
-    return True
-       
-
-
-
-
-#Define Fastener position
-Fastener_positions = [ #defines the positions of the fasteners relative to teh c.g. origin ... Square pattern for testing
-    [-1,0,-1],
-    [1,0,-1],
-    [-1,0,1],
-    [1,0,1]
-]
-
-#Set design parameters, (change standard values if wanted)
-example_design = design_Configuration(Fastener_positions, Total_load_cases, fastener_config = M5_steel)
-
-
-def pull_through_check(design_option):
-            for fastener in design_option.FastenerList:
-                for LC in fastener.load_cases:
-                    A_bearing = math.pi * (design_option.fastener_config.head_diameter**2 - design_option.fastener_config.d_o**2) /4
-                    bearing_stress = LC.Force_Y / A_bearing
-                    if bearing_stress > design_option.fastener_config.material.stress_yield:
-                        return False
-            return True
-
-
-for width in range(10, 20, 0.1):
-    for height in range(10, 20, 0.1):
-        e =0.3
-        fastener_positions = [
-            [ width/2-e, 0,  height/2-e],
-            [-width/2+e, 0,  height/2-e],
-            [ width/2-e, 0, -height/2+e],
-            [-width/2+e, 0, -height/2+e],
-            [0, 0, -height/2+e],
-            [0, 0, -height/2+e]
-        ]
-
-        design_option = design_Configuration(fastener_positions, Total_load_cases, fastener_config = M5_steel)
-        if pull_through_check(design_option):
-            print(f"Design passes for width: {width} cm and height: {height} cm")
-
-
+    def mass(self):#function to determine the mass of the fasteners in the design
+        fastener_total = sum([m_i for m_i in self.FastenerList.fastener_config.mass])
+        Volume_plate = self.t_2*(self.lug_width*self.lug_height - self.n_f*self.A_i)
+        plate_mass = Volume_plate * self.material.density
+        return fastener_total + plate_mass
+    
+    def cost(self):
+        fastener_cost = self.n_f * self.fastener_config.cost #assumed cost per fastener
+        plate_cost = self.mass()*self.material.specific_cost 
+        return fastener_cost + plate_cost
