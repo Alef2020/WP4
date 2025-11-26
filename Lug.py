@@ -15,7 +15,7 @@ material_properties = {
         "sigma_y": 503 * (10**6),
         "sigma_u": 572 * (10**6),
     },
-    "2014-T2": {
+    "2024-T2": {
         "density": 2780,
         "E": 73.1 * (10**9),
         "sigma_y": 324 * (10**6),
@@ -208,23 +208,28 @@ def load_check(
     M_zz,
     W,
     D_1,
-    D_p,
     t_1,
     e,
     l,
     curve_Kty="Curve 3",
 ):
-    Av = 6 / (
-        3 / (0.5 * t_1 * (W - D_1 * np.sin(np.pi / 4)))
-        + 1 / (0.5 * t_1 * (W - D_1 * np.sin(np.pi / 4)))
-        + 1 / (0.5 * t_1 * (W - D_1))
-        + 1 * ((e - D_1 / 2) * t_1)
-    )
-    ratio = Av / (D_p * t_1)  # area ratio
+    # Av = 6 / (
+    #     3 / (0.5 * t_1 * (W - D_1 * np.sin(np.pi / 4)))
+    #     + 1 / (0.5 * t_1 * (W - D_1 * np.sin(np.pi / 4)))
+    #     + 1 / (0.5 * t_1 * (W - D_1))
+    #     + 1 * ((e - D_1 / 2) * t_1)
+    # )
+    A_1 = t_1 * (W / 2 - D_1 / 2 * np.sin(np.pi / 4))
+    A_2 = t_1 * (W / 2 - D_1 / 2)
+    A_3 = A_2
+    A_4 = A_1
+    Av = 6 / (3 / A_1 + 1 / A_2 + 1 / A_3 + 1 / A_4)
+
+    ratio = Av / (D_1 * t_1)  # area ratio
 
     W_D = W / D_1
     t_D = t_1 / D_1
-    e_D = e / D_1
+    e_D = W / (2 * D_1)
 
     F_tu = material_properties[material]["sigma_u"]  # ultimate
     F_ty = material_properties[material]["sigma_y"]  # yield
@@ -245,8 +250,8 @@ def load_check(
     P_tu = (
         Kt(curve_Kt, W_D) * F_tu * t_1 * (W - D_1) * c
     )  # force it can take per failure condition
-    P_Bry = K_Bry(t_D, e_D) * F_tu * D_p * t_1
-    P_ty = K_ty(curve_Kty, ratio) * F_ty * D_p * t_1
+    P_Bry = K_Bry(t_D, e_D) * F_tu * D_1 * t_1
+    P_ty = K_ty(curve_Kty, ratio) * F_ty * D_1 * t_1
 
     # if sigma_max_root < F_ty and P_tu > F_b and P_Bry > F_b and P_ty > F_c:
     #     conclusion = "pass"
@@ -271,7 +276,6 @@ def constraint_1(vars):
         M_z,
         W,
         D_1,
-        D_p,
         t_1,
         e,
         le,
@@ -295,7 +299,6 @@ def constraint_2(vars):
         M_z,
         W,
         D_1,
-        D_p,
         t_1,
         e,
         le,
@@ -319,7 +322,6 @@ def constraint_3(vars):
         M_z,
         W,
         D_1,
-        D_p,
         t_1,
         e,
         le,
@@ -343,7 +345,6 @@ def constraint_4(vars):
         M_z,
         W,
         D_1,
-        D_p,
         t_1,
         e,
         le,
@@ -358,6 +359,31 @@ def constraint_5(vars):
     return W - D_1
 
 
+def constraint_6(vars):
+    W, D_1, t_1, le = vars
+    return W * le * t_1 + 0.5 * np.pi * (W**2 / 4) * t_1 - np.pi * D_1**2 / 4 * t_1
+
+
+def constraint_thickness_gt_width(vars):
+    W, D_1, t_1, le = vars
+    return W - t_1
+
+
+def constraint_A1_positive(vars):
+    W, D_1, t_1, le = vars
+    return t_1 * (W / 2 + D_1 / 2 * np.sin(np.pi / 4))
+
+
+def constraint_A2_positive(vars):
+    W, D_1, t_1, le = vars
+    return t_1 * (W / 2 - D_1 / 2)
+
+
+def constraint_le_gt_D1(vars):
+    W, D_1, t_1, le = vars
+    return le - D_1 - 0.001
+
+
 F_x = 15000  # N
 F_y = 15000  # N
 F_z = 15000  # N
@@ -365,12 +391,17 @@ M_x = 15  # Nm
 M_y = 0  # Nm
 M_z = 15  # Nm
 
+# F_x = 1.597  # N
+# F_y = 0.09743  # N
+# F_z = 0.05389  # N
+# M_x = 0.001  # Nm
+# M_y = 0  # Nm
+# M_z = 0  # Nm
 
 # Geometry m
 
 W = 0.03
 D_1 = 0.02
-D_p = 0.0198  # Diamter of the bolt itself
 t_1 = 0.2
 e = W / 2  # distance center of D_1 to the end of the flange (currently a circular end)
 l = 0.1  # flange length
@@ -403,7 +434,6 @@ a = load_check(
     M_z,
     W,
     D_1,
-    D_p,
     t_1,
     e,
     l,
@@ -413,7 +443,7 @@ a = load_check(
 
 def volume(vars):
     W, D_1, t_1, le = vars
-    return W * le * t_1 + 0.5 * np.pi * (W**2 / 4) * t_1 - np.pi * D_1**2 * t_1
+    return W * le * t_1 + 0.5 * np.pi * (W**2 / 4) * t_1 - np.pi * D_1**2 / 4 * t_1
 
 
 constraints = [
@@ -422,9 +452,14 @@ constraints = [
     {"type": "ineq", "fun": constraint_3},
     {"type": "ineq", "fun": constraint_4},
     {"type": "ineq", "fun": constraint_5},
+    {"type": "ineq", "fun": constraint_6},
+    {"type": "ineq", "fun": constraint_thickness_gt_width},
+    {"type": "ineq", "fun": constraint_A1_positive},
+    {"type": "ineq", "fun": constraint_A2_positive},
+    {"type": "ineq", "fun": constraint_le_gt_D1},
 ]
-bounds = [(0.01, None), (0.01, None), (0.01, None), (0.01, None)]
-x0 = [0.01, 0.01, 0.01, 0.01]
+bounds = [(0.005, None), (0.005, None), (0.005, None), (0.005, None)]
+x0 = [0.0001, 0.00005, 0.0001, 0.0001]
 result = minimize(volume, x0, method="SLSQP", bounds=bounds, constraints=constraints)
 print("Optimization success:", result.success)
 print("Minimum volume =", result.fun)
@@ -432,4 +467,31 @@ print("W = ", result.x[0])
 print("D_1 = ", result.x[1])
 print("t_1 = ", result.x[2])
 print("le = ", result.x[3])
+print(result.fun * flanges * material_properties[material]["density"])
+print("F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c ")
+print(
+    load_check(
+        material,
+        curve_Kt,
+        flanges,
+        c,
+        F_x,
+        F_y,
+        F_z,
+        M_x,
+        M_y,
+        M_z,
+        result.x[0],
+        result.x[1],
+        result.x[2],
+        result.x[0] / 2,
+        result.x[3],
+        curve_Kty,
+    )
+)
+print("A1", result.x[2] * (result.x[0] / 2 - result.x[1] / 2 * np.sin(np.pi / 4)))
+print("A2", result.x[2] * (result.x[0] / 2 - result.x[1] / 2))
 # print(a)
+print(
+    f"W_D = {result.x[0] / result.x[1]}\nt_D = {result.x[3] / result.x[1]}\ne_D = {result.x[0] / (2 * result.x[1])}"
+)
