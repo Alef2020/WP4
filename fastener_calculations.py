@@ -15,7 +15,7 @@ class MaterialProperties(): #class for material properties
         self.Youngs_modulus = E
         self.density = rho
         self.stress_yield = strength
-        self.shear_strenght = shear if shear != 0 else 1.5*self.stress_yield**2 # weird relation as given in WP4, I think its not right yet
+        self.shear = shear if shear != 0 else 1.5*self.stress_yield**2 # weird relation as given in WP4, I think its not right yet
         self.specific_cost = 0.01 #assumed cost per kg, could be changed based on material
 
 #example materials
@@ -62,17 +62,9 @@ class design_Configuration(): #Define one design configuration
         self.fastener_config = fastener_config
         self.A_i = math.pi*(self.fastener_config.d_s/2)**2
 
-        e = 0.3 #distance from edge to center of fastener should be defined based on fastener size
-        fastener_positions = [
-            [ self.width/2-e, 0,  self.height/2-e],
-            [-self.width/2+e, 0,  self.height/2-e],
-            [ self.width/2-e, 0, -self.height/2+e],
-            [-self.width/2+e, 0, -self.height/2+e],
-            [0, 0, -self.height/2+e],
-            [0, 0, -self.height/2+e]
-        ]
+        
         #This section of the code calculates the c.g. of the fastener pattern and ajust the positions to make that the origin
-        CG = [0,0.0]
+        CG = [0,0,0]
         CG[0] = sum([pos[0] for pos in self.fastener_positions])/self.n_f #can prob be done better with np
         CG[2] = sum([pos[2] for pos in self.fastener_positions])/self.n_f
         for Fastner_pos in self.fastener_positions:
@@ -89,7 +81,7 @@ class design_Configuration(): #Define one design configuration
             self.area_moment[0] += self.A_i*Fastener_pos[0]**2 #approximation of 2nd moment of area (x-axis)
             self.area_moment[1] += self.A_i*(Fastener_pos[0]**2 + Fastener_pos[2]**2) #approximation of polar moment of inertia (y-axis))
             self.area_moment[2] += self.A_i*Fastener_pos[2]**2 #approximation of 2nd moment of area around z-axis  
-            self.FastenerList.append(Fastener(Fastener_pos ,self.fastener_config))
+            self.FastenerList.append(Fastener(Fastener_pos, self.fastener_config))
 
         #This section goes through each loadcase for the entire structure, calculates the forces on each fastener and stores them in a fastener object
         for f in self.FastenerList: 
@@ -103,7 +95,7 @@ class design_Configuration(): #Define one design configuration
             f.load_cases = local_load_cases
 
     def mass(self):#function to determine the mass of the fasteners in the design
-        fastener_total = sum([m_i for m_i in self.FastenerList.fastener_config.mass])
+        fastener_total = sum([f.configuration.mass for f in self.FastenerList])
         Volume_plate = self.t_2*(self.lug_width*self.lug_height - self.n_f*self.A_i)
         plate_mass = Volume_plate * self.material.density
         return fastener_total + plate_mass
@@ -112,3 +104,5 @@ class design_Configuration(): #Define one design configuration
         fastener_cost = self.n_f * self.fastener_config.cost #assumed cost per fastener
         plate_cost = self.mass()*self.material.specific_cost 
         return fastener_cost + plate_cost
+    
+design = design_Configuration(fastener_positions = [[1,0,1], [-1,0,1], [1,0,-1], [-1,0,-1]], load_cases = [Load_Case(Fx=1000, Fy=500, Fz=2000)], width = 3, height= 2, t_2 = 4, t_3 = 6, Material = Steel, SC_material = Alumunium, fastener_config = M5_steel)
