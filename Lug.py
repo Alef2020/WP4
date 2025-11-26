@@ -223,7 +223,7 @@ def load_check(
     A_2 = t_1 * (W / 2 - D_1 / 2)
     A_3 = A_2
     A_4 = A_1
-    Av = 6 / (3 / A_1 + 1 / A_2 + 1 / A_3 + 1 / A_4)
+    Av = 6 / ((3 / A_1) + (1 / A_2) + (1 / A_3) + (1 / A_4))
 
     ratio = Av / (D_1 * t_1)  # area ratio
 
@@ -234,7 +234,7 @@ def load_check(
     F_tu = material_properties[material]["sigma_u"]  # ultimate
     F_ty = material_properties[material]["sigma_y"]  # yield
 
-    F_a = F_xx / flanges  # forces per flange (x=a, y=b, z=c)
+    F_a = F_xx  # / flanges  # forces per flange (x=a, y=b, z=c)
     F_b = F_yy / flanges
     F_c = F_zz / flanges
 
@@ -356,7 +356,7 @@ def constraint_4(vars):
 
 def constraint_5(vars):
     W, D_1, t_1, le = vars
-    return W - D_1
+    return W - D_1 - 0.002
 
 
 def constraint_6(vars):
@@ -366,7 +366,7 @@ def constraint_6(vars):
 
 def constraint_thickness_gt_width(vars):
     W, D_1, t_1, le = vars
-    return W - t_1
+    return W - 3 * t_1 - 0.001
 
 
 def constraint_A1_positive(vars):
@@ -381,15 +381,15 @@ def constraint_A2_positive(vars):
 
 def constraint_le_gt_D1(vars):
     W, D_1, t_1, le = vars
-    return le - D_1 - 0.001
+    return le - D_1 - 0.005
 
 
-F_x = 15000  # N
-F_y = 15000  # N
-F_z = 15000  # N
-M_x = 15  # Nm
-M_y = 0  # Nm
-M_z = 15  # Nm
+# F_x = 15000  # N
+# F_y = 15000  # N
+# F_z = 15000  # N
+# M_x = 15  # Nm
+# M_y = 0  # Nm
+# M_z = 15  # Nm
 
 # F_x = 1.597  # N
 # F_y = 0.09743  # N
@@ -398,6 +398,12 @@ M_z = 15  # Nm
 # M_y = 0  # Nm
 # M_z = 0  # Nm
 
+F_x = 1594.125  # N
+F_y = 1594.125  # N
+F_z = 1594.125  # N
+M_x = 0  # Nm
+M_y = 0  # Nm
+M_z = 0  # Nm
 # Geometry m
 
 W = 0.03
@@ -458,7 +464,7 @@ constraints = [
     {"type": "ineq", "fun": constraint_A2_positive},
     {"type": "ineq", "fun": constraint_le_gt_D1},
 ]
-bounds = [(0.005, None), (0.005, None), (0.005, None), (0.005, None)]
+bounds = [(0.005, None), (0.005, None), (0.00001, None), (0.005, None)]
 x0 = [0.0001, 0.00005, 0.0001, 0.0001]
 result = minimize(volume, x0, method="SLSQP", bounds=bounds, constraints=constraints)
 print("Optimization success:", result.success)
