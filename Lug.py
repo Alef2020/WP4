@@ -492,6 +492,15 @@ print(
 print("A1", result.x[2] * (result.x[0] / 2 - result.x[1] / 2 * np.sin(np.pi / 4)))
 print("A2", result.x[2] * (result.x[0] / 2 - result.x[1] / 2))
 # print(a)
+
+A_1 = result.x[2] * (result.x[0] / 2 - result.x[1] / 2 * np.sin(np.pi / 4))
+A_2 = result.x[2] * (result.x[0] / 2 - result.x[1] / 2)
+A_3 = A_2
+A_4 = A_1
+Av = 6 / (3 / A_1 + 1 / A_2 + 1 / A_3 + 1 / A_4)
+
+ratio = Av / (result.x[1] * result.x[2])  # area ratio
+
 print(
-    f"W_D = {result.x[0] / result.x[1]}\nt_D = {result.x[3] / result.x[1]}\ne_D = {result.x[0] / (2 * result.x[1])}"
+    f"W_D = {result.x[0] / result.x[1]}\nt_D = {result.x[3] / result.x[1]}\ne_D = {result.x[0] / (2 * result.x[1])}\nK_t = {Kt(curve_Kt, result.x[0] / result.x[1])}\nK_Bry = {K_Bry(result.x[3] / result.x[1], result.x[0] / (2 * result.x[1]))}\nK_ty = {K_ty(curve_Kty, ratio)}"
 )
