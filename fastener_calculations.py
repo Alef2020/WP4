@@ -19,11 +19,11 @@ class MaterialProperties(): #class for material properties
         self.specific_cost = 0.01 #assumed cost per kg, could be changed based on material
 
 #example materials
-Alumunium = MaterialProperties(E = 70e9, rho = 2700) #example material
-Steel = MaterialProperties(E = 200e9, rho = 7850) #example material  
+Alumunium = MaterialProperties(E = 70e9, rho = 2700, strength=500e6) #example material
+Steel = MaterialProperties(E = 200e9, rho = 7850, strength=500e6) #example material  
 
 class Fastener_Configuration(): #Define one design configuration
-    def __init__(self, Head_diameter = 0.0075, shank_diameter = 0.007, Nut_diameter = 0.004, Length = 1, material = Steel, mass = 0): #standard M4-steel bolt
+    def __init__(self, Head_diameter = 0.0075, shank_diameter = 0.007, Nut_diameter = 0.004, Length = 0.05, material = Steel, mass = 0.01): #standard M4-steel bolt
         self.d_s = shank_diameter
         self.d_h = Head_diameter
         self.d_n = Nut_diameter
@@ -34,7 +34,7 @@ class Fastener_Configuration(): #Define one design configuration
 
 #example fastener config
 M5_steel = Fastener_Configuration(0.0083, 0.0075, 0.005, Steel)
-M6_Aluminium = Fastener_Configuration(0.011, 0.009, 0.006, Alumunium)
+M6_Steel = Fastener_Configuration(0.011, 0.009, 0.006, Alumunium)
 
 class Fastener(): #Define one fastener with its properties and load cases
     def __init__(self, position = [0,0,0], configuration = Fastener_Configuration(), load_cases = []):
