@@ -8,54 +8,63 @@ material_properties = {
         "E": 72.4 * (10**9),
         "sigma_y": 414 * (10**6),
         "sigma_u": 483 * (10**6),
+        "shear": 290 * (10**6),
     },
     "7075-T6": {
         "density": 2810,
         "E": 71.7 * (10**9),
         "sigma_y": 503 * (10**6),
         "sigma_u": 572 * (10**6),
+        "shear": 331 * (10**6),
     },
     "2024-T2": {
         "density": 2780,
         "E": 73.1 * (10**9),
         "sigma_y": 324 * (10**6),
         "sigma_u": 469 * (10**6),
+        "shear": 283 * (10**6),
     },
     "2024-T3": {
         "density": 2780,
         "E": 73.1 * (10**9),
         "sigma_y": 345 * (10**6),
         "sigma_u": 483 * (10**6),
+        "shear": 283 * (10**6),
     },
     "2024-T4": {
         "density": 2780,
         "E": 71.0 * (10**9),
         "sigma_y": 324 * (10**6),
         "sigma_u": 469 * (10**6),
+        "shear": 290 * (10**6),
     },
     "AZ1916-T6": {
         "density": 1810,
         "E": 44.8 * (10**9),
         "sigma_y": 145 * (10**6),
         "sigma_u": 275 * (10**6),
+        "shear": 110 * (10**6),
     },
     "356-T6": {
         "density": 2680,
         "E": 72.4 * (10**9),
         "sigma_y": 138 * (10**6),
         "sigma_u": 207 * (10**6),
+        "shear": 180 * (10**6),
     },
     "4130-steel": {
         "density": 7850,
         "E": 205 * (10**9),
         "sigma_y": 435 * (10**6),
         "sigma_u": 670 * (10**6),
+        "shear": 338 * (10**6),
     },
     "8630-steel": {
         "density": 7850,
         "E": 200 * (10**9),
         "sigma_y": 550 * (10**6),
         "sigma_u": 620 * (10**6),
+        "shear": 338 * (10**6),
     },
 }
 
@@ -219,7 +228,7 @@ def load_check(
     #     + 1 / (0.5 * t_1 * (W - D_1))
     #     + 1 * ((e - D_1 / 2) * t_1)
     # )
-    A_1 = t_1 * (W / 2 - D_1 / 2 * np.sin(np.pi / 4))
+    A_1 = t_1 * (W / 2 - (D_1 / 2) * np.sin(np.pi / 4))
     A_2 = t_1 * (W / 2 - D_1 / 2)
     A_3 = A_2
     A_4 = A_1
@@ -253,10 +262,8 @@ def load_check(
     P_Bry = K_Bry(t_D, e_D) * F_tu * D_1 * t_1
     P_ty = K_ty(curve_Kty, ratio) * F_ty * D_1 * t_1
 
-    # if sigma_max_root < F_ty and P_tu > F_b and P_Bry > F_b and P_ty > F_c:
-    #     conclusion = "pass"
-    # else:
-    #     conclusion = "fail"
+    F_shear_max = (F_b**2 + F_c**2)**(1/2)
+    sigma_bolt_shear = F_shear_max / (2 * np.pi * ((D_1 / 2)**2))
 
     return F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c
 
@@ -464,8 +471,8 @@ constraints = [
     {"type": "ineq", "fun": constraint_A2_positive},
     {"type": "ineq", "fun": constraint_le_gt_D1},
 ]
-bounds = [(0.005, None), (0.005, None), (0.00001, None), (0.005, None)]
-x0 = [0.0001, 0.00005, 0.0001, 0.0001]
+bounds = [(0.0005, None), (0.0005, None), (0.00001, None), (0.0005, None)]
+x0 = [0.006, 0.005, 0.0001, 0.0006]
 result = minimize(volume, x0, method="SLSQP", bounds=bounds, constraints=constraints)
 print("Optimization success:", result.success)
 print("Minimum volume =", result.fun)
