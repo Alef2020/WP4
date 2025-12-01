@@ -100,28 +100,38 @@ def interpolation(filename, i=0, j=1):
     y = np.array(y_vals)
 
     # create interpolation function
-    f = interp1d(x, y, kind="cubic", fill_value="extrapolate")
+    #f = interp1d(x, y, kind="cubic", fill_value="extrapolate")
 
-    return f
+    coeffs = np.polyfit(x, y, 9)
+    
+
+    return coeffs
 
 
 def Kt(curve, W_D):
     if curve == "Curve 1":
         f_interp = interpolation("Kt Curves.csv", 0, 1)
+        K_t = np.polyval( f_interp, W_D)
     if curve == "Curve 2":
         f_interp = interpolation("Kt Curves.csv", 2, 3)
+        K_t = np.polyval( f_interp, W_D)
     if curve == "Curve 3":
         f_interp = interpolation("Kt Curves.csv", 4, 5)
+        K_t = np.polyval( f_interp, W_D)
     if curve == "Curve 4":
         f_interp = interpolation("Kt Curves.csv", 6, 7)
+        K_t = np.polyval( f_interp, W_D)
     if curve == "Curve 5":
         f_interp = interpolation("Kt Curves.csv", 8, 9)
+        K_t = np.polyval( f_interp, W_D)
     if curve == "Curve 6":
         f_interp = interpolation("Kt Curves.csv", 10, 11)
+        K_t = np.polyval( f_interp, W_D)
     if curve == "Curve 7":
         f_interp = interpolation("Kt Curves.csv", 12, 13)
+        K_t = np.polyval( f_interp, W_D)
 
-    K_t = f_interp(W_D)
+    
 
     return K_t
 
@@ -129,31 +139,31 @@ def Kt(curve, W_D):
 def K_Bry(t_D, e_D):
     if t_D <= 0.07:
         f_interp = interpolation("K_bry Curves.csv", 0, 1)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     elif t_D <= 0.09:
         f_interp = interpolation("K_bry Curves.csv", 2, 3)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     elif t_D <= 0.11:
         f_interp = interpolation("K_bry Curves.csv", 4, 5)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     elif t_D <= 0.135:
         f_interp = interpolation("K_bry Curves.csv", 6, 7)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     elif t_D <= 0.175:
         f_interp = interpolation("K_bry Curves.csv", 8, 9)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     elif t_D <= 0.25:
         f_interp = interpolation("K_bry Curves.csv", 10, 11)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     elif t_D <= 0.35:
         f_interp = interpolation("K_bry Curves.csv", 12, 13)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     elif t_D <= 0.5:
         f_interp = interpolation("K_bry Curves.csv", 14, 15)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     else:
         f_interp = interpolation("K_bry Curves.csv", 16, 17)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
 
     return K_bry
 
@@ -161,46 +171,46 @@ def K_Bry(t_D, e_D):
 def K_ty(curve, Av_Abr):
     if curve == "Curve 1":
         f_interp = interpolation("K_ty Curves.csv", 0, 1)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 2":
         f_interp = interpolation("K_ty Curves.csv", 2, 3)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 3":
         f_interp = interpolation("K_ty Curves.csv", 4, 5)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 4":
         f_interp = interpolation("K_ty Curves.csv", 6, 7)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 5":
         f_interp = interpolation("K_ty Curves.csv", 8, 9)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 6":
         f_interp = interpolation("K_ty Curves.csv", 10, 11)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 7":
         f_interp = interpolation("K_ty Curves.csv", 12, 13)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 8":
         f_interp = interpolation("K_ty Curves.csv", 14, 15)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 9":
         f_interp = interpolation("K_ty Curves.csv", 16, 17)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 10":
         f_interp = interpolation("K_ty Curves.csv", 18, 19)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 11":
         f_interp = interpolation("K_ty Curves.csv", 20, 21)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 12":
         f_interp = interpolation("K_ty Curves.csv", 22, 23)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 13":
         f_interp = interpolation("K_ty Curves.csv", 24, 25)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 14":
         f_interp = interpolation("K_ty Curves.csv", 26, 27)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     return Kty
 
 
