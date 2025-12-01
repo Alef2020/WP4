@@ -259,7 +259,7 @@ def load_check(
     P_tu = (
         Kt(curve_Kt, W_D) * F_tu * t_1 * (W - D_1) * c
     )  # force it can take per failure condition
-    P_Bry = K_Bry(t_D, e_D) * F_tu * D_1 * t_1
+    P_Bry = K_Bry(t_D, e_D) * F_ty * D_1 * t_1
     P_ty = K_ty(curve_Kty, ratio) * F_ty * D_1 * t_1
 
     F_shear_max = (F_b**2 + F_c**2)**(1/2)
@@ -368,12 +368,12 @@ def constraint_5(vars):
 
 def constraint_6(vars):
     W, D_1, t_1, le = vars
-    return W * le * t_1 + 0.5 * np.pi * (W**2 / 4) * t_1 - np.pi * D_1**2 / 4 * t_1
+    return W * le * t_1 + 0.5 * np.pi * (W**2 / 4) * t_1 - np.pi * (D_1**2 / 4) * t_1
 
 
 def constraint_thickness_gt_width(vars):
     W, D_1, t_1, le = vars
-    return W - 3 * t_1 - 0.001
+    return W - 3*t_1 - 0.001
 
 
 def constraint_A1_positive(vars):
@@ -405,9 +405,9 @@ def constraint_le_gt_D1(vars):
 # M_y = 0  # Nm
 # M_z = 0  # Nm
 
-F_x = 1594.125  # N
-F_y = 1594.125  # N
-F_z = 1594.125  # N
+F_x = 490.5  # N
+F_y = 490.5  # N
+F_z = 1373.4  # N
 M_x = 0  # Nm
 M_y = 0  # Nm
 M_z = 0  # Nm
@@ -456,7 +456,7 @@ a = load_check(
 
 def volume(vars):
     W, D_1, t_1, le = vars
-    return W * le * t_1 + 0.5 * np.pi * (W**2 / 4) * t_1 - np.pi * D_1**2 / 4 * t_1
+    return W * le * t_1 + 0.5 * np.pi * (W**2 / 4) * t_1 - np.pi * (D_1**2 / 4) * t_1
 
 
 constraints = [
