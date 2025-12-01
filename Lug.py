@@ -373,17 +373,17 @@ def constraint_6(vars):
 
 def constraint_thickness_gt_width(vars):
     W, D_1, t_1, le = vars
-    return W - 3*t_1 - 0.001
+    return W - t_1 - 0.001
 
 
 def constraint_A1_positive(vars):
     W, D_1, t_1, le = vars
-    return t_1 * (W / 2 + D_1 / 2 * np.sin(np.pi / 4))
+    return  (W / 2 -( D_1 / 2 ) * np.sin(np.pi / 4))
 
 
 def constraint_A2_positive(vars):
     W, D_1, t_1, le = vars
-    return t_1 * (W / 2 - D_1 / 2)
+    return  (W / 2 - D_1 / 2)
 
 
 def constraint_le_gt_D1(vars):
