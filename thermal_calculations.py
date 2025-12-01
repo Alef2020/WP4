@@ -3,33 +3,33 @@ import math
 # ===============================
 # Assumed material and geometry
 # ===============================
-thermal_coefficient_lug = 2e-5  # 1/K
-thermal_coefficient_bolt = 1e-5  # 1/K
-fastener_youngs_modulus = 50e9  # Pa
-backplate_youngs_modulus = 50e9  # Pa
-skin_youngs_modulus = 50e9  # Pa
+thermal_coefficient_lug = 2e-5  # 1/K placeholder
+thermal_coefficient_bolt = 1e-5  # 1/K placeholder
+fastener_youngs_modulus = 50e9  # Pa placeholder
+backplate_youngs_modulus = 50e9  # Pa placeholder
+skin_youngs_modulus = 50e9  # Pa placeholder
 
-backplate_thickness = 0.01  # m
-skin_thickness = 0.01  # m
-bolt_head_radius = 0.01  # m
-hole_diameter = 0.01  # m
-bolt_distance_to_edge = 0.2  # m
+backplate_thickness = 0.002  # m
+skin_thickness = 0.002  # m
+
+bolt_head_radius = 0.005  # m placeholder
+bolt_distance_to_edge = 0.0075  # m
 
 total_thickness = backplate_thickness + skin_thickness
 
 # Fastener geometry: [length, radius]
 fastener_geometry_list = [
-    [0.01, 0.003],
-    [0.02, 0.002],
-    [0.01, 0.003]
-]
+    [0.01, 0.0035],
+    [0.004, 0.0025],
+    [0.01, 0.0035]
+] # placeholder
 
-integration_steps = 100000  # numerical integration steps
+integration_steps = 10000  # numerical integration steps
 
 # ===============================
 # Temperature conditions
 # ===============================
-assembly_temperature = 288  # K
+assembly_temperature = 280.5  # K placeholder
 min_temp = 263  # K
 max_temp = 298  # K
 
@@ -66,11 +66,12 @@ if compression_cone_limit_radius > bolt_distance_to_edge:
 step_size = total_thickness / integration_steps
 compliance_clamped_part = 0
 
+
+mid_thickness = total_thickness / 2
 for i in range(integration_steps):
     z = i * step_size
 
     # Determine radius at this z
-    mid_thickness = total_thickness / 2
     if z <= mid_thickness:
         r = bolt_head_radius + (2 * (compression_cone_limit_radius - bolt_head_radius) / total_thickness) * z
     else:
