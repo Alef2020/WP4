@@ -262,15 +262,15 @@ def load_check(
     P_Bry = K_Bry(t_D, e_D) * F_ty * D_1 * t_1
     P_ty = K_ty(curve_Kty, ratio) * F_ty * D_1 * t_1
 
-    F_shear_max = (F_b**2 + F_c**2)**(1/2)
-    sigma_bolt_shear = F_shear_max / (2 * np.pi * ((D_1 / 2)**2))
+    F_shear_max = (F_b**2 + F_c**2) ** (1 / 2)
+    sigma_bolt_shear = F_shear_max / (2 * np.pi * ((D_1 / 2) ** 2))
 
-    return F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c
+    return F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear
 
 
 def constraint_1(vars):
     W, D_1, t_1, le = vars
-    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c = load_check(
+    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
         material,
         curve_Kt,
         flanges,
@@ -293,7 +293,7 @@ def constraint_1(vars):
 
 def constraint_2(vars):
     W, D_1, t_1, le = vars
-    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c = load_check(
+    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
         material,
         curve_Kt,
         flanges,
@@ -316,7 +316,7 @@ def constraint_2(vars):
 
 def constraint_3(vars):
     W, D_1, t_1, le = vars
-    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c = load_check(
+    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
         material,
         curve_Kt,
         flanges,
@@ -339,7 +339,7 @@ def constraint_3(vars):
 
 def constraint_4(vars):
     W, D_1, t_1, le = vars
-    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c = load_check(
+    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
         material,
         curve_Kt,
         flanges,
@@ -389,6 +389,29 @@ def constraint_A2_positive(vars):
 def constraint_le_gt_D1(vars):
     W, D_1, t_1, le = vars
     return le - D_1 - 0.005
+
+
+def constraint_sigma_bolt_shear(vars):
+    W, D_1, t_1, le = vars
+    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
+        material,
+        curve_Kt,
+        flanges,
+        c,
+        F_x,
+        F_y,
+        F_z,
+        M_x,
+        M_y,
+        M_z,
+        W,
+        D_1,
+        t_1,
+        e,
+        le,
+        curve_Kty,
+    )
+    return material_properties[material]["shear"] * c - sigma_bolt_shear
 
 
 # F_x = 15000  # N
@@ -470,6 +493,7 @@ constraints = [
     {"type": "ineq", "fun": constraint_A1_positive},
     {"type": "ineq", "fun": constraint_A2_positive},
     {"type": "ineq", "fun": constraint_le_gt_D1},
+    {"type": "ineq", "fun": constraint_sigma_bolt_shear},
 ]
 bounds = [(0.0005, None), (0.0005, None), (0.00001, None), (0.0005, None)]
 x0 = [0.006, 0.005, 0.0001, 0.0006]
