@@ -16,7 +16,7 @@ class MaterialProperties(): #class for material properties
         self.density = rho
         self.stress_yield = strength
         self.stress_ultimate = Ultimate_strength
-        self.shear = shear if shear != 0 else 1.5*self.stress_yield**2 # weird relation as given in WP4, I think its not right yet
+        self.shear = shear if shear != 0 else 2*self.stress_yield/3 # weird relation as given in WP4, I think its not right yet
         self.specific_cost = specific_cost
 
 #example materials
@@ -107,9 +107,6 @@ class design_Configuration(): #Define one design configuration
         plate_cost = self.mass()*self.material.specific_cost 
         return fastener_cost + plate_cost
 
-
-
-
 #Bolt Materials
 A2_stainless = MaterialProperties(E = 200e9, rho = 7850, strength=500e6) #Placeholder
 
@@ -124,8 +121,7 @@ m356_T6     = MaterialProperties(72.4*(10**9),2680,138*(10**6),207*(10**6),0)
 m4130_steel = MaterialProperties(205*(10**9) ,7850,435*(10**6),670*(10**6),0)
 m8630_steel = MaterialProperties(200*(10**9) ,7850,550*(10**6),620*(10**6), 340e6)
 
-Material_lst = [
-    Alumunium, 
+Material_lst = [ 
     m2014_T6,
     m7075_T6,
     m2024_T2,
@@ -143,5 +139,10 @@ Stainless_M6X30 = Fastener_Configuration(0.010, 0.006, 0.010, 0.03, A2_stainless
 Stainless_M8X30 = Fastener_Configuration(0.013, 0.008, 0.013, 0.03, A2_stainless, 0.0209, 0.42)
 Stainless_M10X35 = Fastener_Configuration(0.017, 0.01, 0.017, 0.035, A2_stainless, 0.0429, 0.54)
 
-
+Bolt_lst = [
+    Stainless_M5X30,
+    Stainless_M6X30,
+    Stainless_M8X30,
+    Stainless_M10X35
+]
 
