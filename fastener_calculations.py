@@ -137,7 +137,11 @@ Material_lst = [
     m8630_steel
 ]
 
+#Stainless_MAXB = Fastener_Configuration(s, M, s_nut, L, material, mass, price per pc)
+Stainless_M5X30 = Fastener_Configuration(0.008, 0.005, 0.008, 0.03, A2_stainless, 0.0066, 0.35)
+Stainless_M6X30 = Fastener_Configuration(0.010, 0.006, 0.010, 0.03, A2_stainless, 0.0106, 0.26)
+Stainless_M8X30 = Fastener_Configuration(0.013, 0.008, 0.013, 0.03, A2_stainless, 0.0209, 0.42)
+Stainless_M10X35 = Fastener_Configuration(0.017, 0.01, 0.017, 0.035, A2_stainless, 0.0429, 0.54)
 
-IS4014_stainless = Fastener_Configuration(
-    0.008, 0.005, 0.008, 0.030, A2_stainless, 0.0066, 0.62
-)
+
+
