@@ -5,7 +5,7 @@ import math
 # ===============================
 thermal_coefficient_lug = 2e-5  # 1/K
 thermal_coefficient_bolt = 1e-5  # 1/K
-fastener_youngs_modulus = 193e9  # Pa ( Young modulus of A2-70, the OFS we're using)
+fastener_youngs_modulus = 50e9  # Pa
 backplate_youngs_modulus = 50e9  # Pa
 skin_youngs_modulus = 50e9  # Pa
 
@@ -23,32 +23,6 @@ fastener_geometry_list = [
     [0.02, 0.002],
     [0.01, 0.003]
 ]
-
-#OFS Fasteners
-
-fasteners = {
-    "M5": {
-        "d_nom": 5e-3,      # nominal diameter [m]
-        "d_minor": 4.02e-3, # thread minor (core) diameter [m] (not used in this simple δ_b)
-        "D_fo": 8e-3        # under-head / bearing diameter [m]
-    },
-    "M6": {
-        "d_nom": 6e-3,
-        "d_minor": 4.79e-3,
-        "D_fo": 10e-3
-    },
-    "M8": {
-        "d_nom": 8e-3,
-        "d_minor": 6.47e-3,
-        "D_fo": 13e-3
-    },
-    "M10": {
-        "d_nom": 10e-3,
-        "d_minor": 8.16e-3,
-        "D_fo": 17e-3
-    }
-}
-
 
 integration_steps = 100000  # numerical integration steps
 
