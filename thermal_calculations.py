@@ -1,59 +1,35 @@
 import math
-from fastener_calculations import *
-
 
 # ===============================
 # Assumed material and geometry
 # ===============================
-thermal_coefficient_lug = 2e-5  # 1/K
-thermal_coefficient_bolt = 1e-5  # 1/K
+thermal_coefficient_lug = 2.3e-5  # 1/K
+thermal_coefficient_fastener = 1.75e-5  # 1/K
 fastener_youngs_modulus = 193e9  # Pa
-backplate_youngs_modulus = 50e9  # Pa
-skin_youngs_modulus = 50e9  # Pa
+backplate_youngs_modulus = 72.4e9  # Pa
+skin_youngs_modulus = 72.4e9  # Pa
 
-backplate_thickness = 0.01  # m
-skin_thickness = 0.01  # m
-bolt_head_radius = 0.01  # m
-hole_diameter = 0.01  # m
-bolt_distance_to_edge = 0.2  # m
+backplate_thickness = 0.002  # m
+skin_thickness = 0.002  # m
+
+bolt_head_radius = 0.005  # m placeholder
+bolt_distance_to_edge = 0.0075  # m
 
 total_thickness = backplate_thickness + skin_thickness
 
-
-
-
-# ===========================
-# Fastener Geometry
-# ===========================
-
-
-d_nominal = 0.005
-d_minor = 4.134e-3 # https://www.accu.co.uk/p/117-iso-metric-thread-dimensions
-
-L_h_sub   = 3.5e-3 #m
-L_eng_sub  = 3e-3  #m
-L_n_sub   =  3.5e-3  #m
-L_shank = 4e-3  #m (t2+t3)
-
-d_h_sub = 8e-3 #m
-d_eng_sub = 5e-3 #m
-d_n_sub = 8e-3 #m
-
-
-
+# Fastener geometry: [length, radius]
 fastener_geometry_list = [
-    [L_shank, d_nominal/2],
-    [L_h_sub, d_h_sub/2],
-    [L_eng_sub, d_eng_sub/2],
-    [L_n_sub, d_n_sub/2]
+    [0.0035, 0.004],
+    [0.004, 0.0025],
+    [0.0035, 0.004]
 ]
 
-integration_steps = 100000  # numerical integration steps
+integration_steps = 10000  # numerical integration steps
 
 # ===============================
 # Temperature conditions
 # ===============================
-assembly_temperature = 288  # K
+assembly_temperature = 290  # K
 min_temp = 263  # K
 max_temp = 298  # K
 
@@ -90,11 +66,12 @@ if compression_cone_limit_radius > bolt_distance_to_edge:
 step_size = total_thickness / integration_steps
 compliance_clamped_part = 0
 
+
+mid_thickness = total_thickness / 2
 for i in range(integration_steps):
     z = i * step_size
 
     # Determine radius at this z
-    mid_thickness = total_thickness / 2
     if z <= mid_thickness:
         r = bolt_head_radius + (2 * (compression_cone_limit_radius - bolt_head_radius) / total_thickness) * z
     else:
@@ -112,7 +89,8 @@ for i in range(integration_steps):
 
     # Increment compliance
     compliance_clamped_part += step_size / (E * math.pi * r ** 2)
-
+print(compliance_clamped_part)
+print(compliance_fastener)
 # ===============================
 # Calculate forces on fasteners
 # ===============================
@@ -121,15 +99,6 @@ for fastener in fastener_geometry_list:
     total_bolt_length += fastener[0]
 
 for delta_t in delta_t_list:
-    force = total_bolt_length * (thermal_coefficient_lug - thermal_coefficient_bolt) * delta_t
+    force = total_bolt_length * (thermal_coefficient_lug - thermal_coefficient_fastener) * delta_t
     force = force / (compliance_fastener + compliance_clamped_part)
     print("ΔT = ", delta_t, "K, Force = ", force, "N")
-
-
-
-# ===============================
-# Force Ratio Function
-# ===============================
-
-def force_ratio(compliance_fastener, compliance_clamped_part):
-    return compliance_fastener / (compliance_fastener + compliance_clamped_part)
