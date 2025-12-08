@@ -11,30 +11,32 @@ class Load_Case(): #Define one load, this is more for clarity, it could also jus
         self.Moment_Z = Mz    
 
 class MaterialProperties(): #class for material properties
-    def __init__(self, E,  rho = 0, strength = 0, shear = 0): #more properties could be added is needed
+    def __init__(self, E,  rho = 0, strength = 0, Ultimate_strength = 0, shear = 0, specific_cost = 0.01): #more properties could be added is needed
         self.Youngs_modulus = E
         self.density = rho
         self.stress_yield = strength
-        self.shear = shear if shear != 0 else 1.5*self.stress_yield**2 # weird relation as given in WP4, I think its not right yet
-        self.specific_cost = 0.01 #assumed cost per kg, could be changed based on material
+        self.stress_ultimate = Ultimate_strength
+        self.shear = shear if shear != 0 else 2*self.stress_yield/3 # weird relation as given in WP4, I think its not right yet
+        self.specific_cost = specific_cost
 
 #example materials
 Alumunium = MaterialProperties(E = 70e9, rho = 2700, strength=500e6) #example material
 Steel = MaterialProperties(E = 200e9, rho = 7850, strength=500e6) #example material  
 
 class Fastener_Configuration(): #Define one design configuration
-    def __init__(self, Head_diameter = 0.0075, shank_diameter = 0.007, Nut_diameter = 0.004, Length = 0.05, material = Steel, mass = 0.01): #standard M4-steel bolt
+    def __init__(self, Head_diameter = 0.0075, shank_diameter = 0.007, Nut_diameter = 0.004, Length = 0.05, material = Steel, mass = 0.01, cost = 1 ): #standard M4-steel bolt
         self.d_s = shank_diameter
         self.d_h = Head_diameter
         self.d_n = Nut_diameter
         self.L = Length
         self.material = material
         self.mass = mass if mass != 0 else 1.3*(math.pi*(self.d_s/2)**2)*material.density #approximate mass based on volume of cylinder of 3cm length or given mass
-        self.cost = 0.5 #assumed cost per fastener, could be changed based on material and size
+        self.cost = cost #assumed cost per fastener, could be changed based on material and size
 
 #example fastener config
 M5_steel = Fastener_Configuration(0.0083, 0.0075, 0.005, Steel)
 M6_Steel = Fastener_Configuration(0.011, 0.009, 0.006, Alumunium)
+
 
 class Fastener(): #Define one fastener with its properties and load cases
     def __init__(self, position = [0,0,0], configuration = Fastener_Configuration(), load_cases = []):
@@ -104,5 +106,43 @@ class design_Configuration(): #Define one design configuration
         fastener_cost = self.n_f * self.fastener_config.cost #assumed cost per fastener
         plate_cost = self.mass()*self.material.specific_cost 
         return fastener_cost + plate_cost
-    
-design = design_Configuration(fastener_positions = [[1,0,1], [-1,0,1], [1,0,-1], [-1,0,-1]], load_cases = [Load_Case(Fx=1000, Fy=500, Fz=2000)], width = 3, height= 2, t_2 = 4, t_3 = 6, Material = Steel, SC_material = Alumunium, fastener_config = M5_steel)
+
+#Bolt Materials
+A2_stainless = MaterialProperties(E = 200e9, rho = 7850, strength=500e6) #Placeholder
+
+#actual Materials
+m2014_T6    = MaterialProperties(72.4*(10**9),2800,414*(10**6),483*(10**6),210e6)
+m7075_T6    = MaterialProperties(71.7*(10**9),2810,503*(10**6),572*(10**6),331e6)
+m2024_T2    = MaterialProperties(73.1*(10**9),2780,324*(10**6),469*(10**6),283e6)
+m2024_T3    = MaterialProperties(73.1*(10**9),2780,345*(10**6),483*(10**6),283e6)
+m2024_T4    = MaterialProperties(71.0*(10**9),2780,324*(10**6),469*(10**6),283e6)
+mAZ1916_T6  = MaterialProperties(44.8*(10**9),1810,145*(10**6),275*(10**6),0)
+m356_T6     = MaterialProperties(72.4*(10**9),2680,138*(10**6),207*(10**6),0)
+m4130_steel = MaterialProperties(205*(10**9) ,7850,435*(10**6),670*(10**6),0)
+m8630_steel = MaterialProperties(200*(10**9) ,7850,550*(10**6),620*(10**6), 340e6)
+
+Material_lst = [ 
+    m2014_T6,
+    m7075_T6,
+    m2024_T2,
+    m2024_T3,
+    m2024_T4,
+    mAZ1916_T6,
+    m356_T6,
+    m4130_steel,
+    m8630_steel
+]
+
+#Stainless_MAXB = Fastener_Configuration(s, M, s_nut, L, material, mass, price per pc)
+Stainless_M5X30 = Fastener_Configuration(0.008, 0.005, 0.008, 0.03, A2_stainless, 0.0066, 0.35)
+Stainless_M6X30 = Fastener_Configuration(0.010, 0.006, 0.010, 0.03, A2_stainless, 0.0106, 0.26)
+Stainless_M8X30 = Fastener_Configuration(0.013, 0.008, 0.013, 0.03, A2_stainless, 0.0209, 0.42)
+Stainless_M10X35 = Fastener_Configuration(0.017, 0.01, 0.017, 0.035, A2_stainless, 0.0429, 0.54)
+
+Bolt_lst = [
+    Stainless_M5X30,
+    Stainless_M6X30,
+    Stainless_M8X30,
+    Stainless_M10X35
+]
+
