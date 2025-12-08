@@ -90,9 +90,21 @@ class design_Configuration(): #Define one design configuration
             local_load_cases = []
             for LC in self.load_cases: 
                 F_p = Load_Case(0,0,0,0,0,0)
-                F_p.Force_X = LC.Force_X / self.n_f + LC.Moment_Y * f.position[2] * self.A_i / self.area_moment[2]
-                F_p.Force_Y = LC.Force_Y / self.n_f + LC.Moment_Z * f.position[0] * self.A_i / self.area_moment[0] - LC.Moment_X * f.position[2] * self.A_i / self.area_moment[2]
-                F_p.Force_Z = LC.Force_Z / self.n_f - LC.Moment_Y * f.position[0] * self.A_i / self.area_moment[0]
+                # Distribute forces evenly across fasteners
+                F_p.Force_X = LC.Force_X / self.n_f
+                F_p.Force_Y = LC.Force_Y / self.n_f
+                F_p.Force_Z = LC.Force_Z / self.n_f
+                
+                # Add moment contributions using right-hand rule (r × M pattern)
+                # Moment_X (rotation about X-axis): affects forces in Y-Z plane
+                # Moment_Y (rotation about Y-axis): affects forces in X-Z plane  
+                # Moment_Z (rotation about Z-axis): affects forces in X-Y plane
+                F_p.Force_X += LC.Moment_Y * f.position[2] * self.A_i / self.area_moment[1]
+                F_p.Force_Z -= LC.Moment_Y * f.position[0] * self.A_i / self.area_moment[1]
+                
+                F_p.Force_Y += LC.Moment_Z * f.position[0] * self.A_i / self.area_moment[0]  
+                F_p.Force_Y -= LC.Moment_X * f.position[2] * self.A_i / self.area_moment[2]
+                
                 local_load_cases.append(F_p) # Note that there are no moments on the fastener itself in this simple model
             f.load_cases = local_load_cases
 
