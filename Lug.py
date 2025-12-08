@@ -48,8 +48,8 @@ material_properties = {
     "356-T6": {
         "density": 2680,
         "E": 72.4 * (10**9),
-        "sigma_y": 138 * (10**6),
-        "sigma_u": 207 * (10**6),
+        "sigma_y": 170 * (10**6),
+        "sigma_u": 240 * (10**6),
         "shear": 180 * (10**6),
     },
     "4130-steel": {
@@ -253,7 +253,7 @@ def load_check(
     F_tu = material_properties[material]["sigma_u"]  # ultimate
     F_ty = material_properties[material]["sigma_y"]  # yield
 
-    F_a = F_xx  # / flanges  # forces per flange (x=a, y=b, z=c)
+    F_a = F_xx #/ flanges  # forces per flange (x=a, y=b, z=c)
     F_b = F_yy / flanges
     F_c = F_zz / flanges
 
@@ -279,7 +279,7 @@ def load_check(
 
 
 def constraint_1(vars):
-    W, D_1, t_1, le = vars
+    W, t_1, le = vars
     F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
         material,
         curve_Kt,
@@ -302,7 +302,7 @@ def constraint_1(vars):
 
 
 def constraint_2(vars):
-    W, D_1, t_1, le = vars
+    W, t_1, le = vars
     F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
         material,
         curve_Kt,
@@ -325,7 +325,7 @@ def constraint_2(vars):
 
 
 def constraint_3(vars):
-    W, D_1, t_1, le = vars
+    W, t_1, le = vars
     F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
         material,
         curve_Kt,
@@ -348,7 +348,7 @@ def constraint_3(vars):
 
 
 def constraint_4(vars):
-    W, D_1, t_1, le = vars
+    W, t_1, le = vars
     F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
         material,
         curve_Kt,
@@ -372,37 +372,37 @@ def constraint_4(vars):
 
 
 def constraint_5(vars):
-    W, D_1, t_1, le = vars
+    W, t_1, le = vars
     return W - D_1 - 0.002
 
 
 def constraint_6(vars):
-    W, D_1, t_1, le = vars
+    W, t_1, le = vars
     return W * le * t_1 + 0.5 * np.pi * (W**2 / 4) * t_1 - np.pi * (D_1**2 / 4) * t_1
 
 
 def constraint_thickness_gt_width(vars):
-    W, D_1, t_1, le = vars
+    W, t_1, le = vars
     return W - t_1 - 0.001
 
 
 def constraint_A1_positive(vars):
-    W, D_1, t_1, le = vars
+    W, t_1, le = vars
     return  (W / 2 -( D_1 / 2 ) * np.sin(np.pi / 4))
 
 
 def constraint_A2_positive(vars):
-    W, D_1, t_1, le = vars
+    W, t_1, le = vars
     return  (W / 2 - D_1 / 2)
 
 
 def constraint_le_gt_D1(vars):
-    W, D_1, t_1, le = vars
+    W, t_1, le = vars
     return le - D_1 - 0.005
 
 
 def constraint_sigma_bolt_shear(vars):
-    W, D_1, t_1, le = vars
+    W, t_1, le = vars
     F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
         material,
         curve_Kt,
@@ -441,13 +441,14 @@ def constraint_sigma_bolt_shear(vars):
 F_x = 490.5  # N
 F_y = 490.5  # N
 F_z = 1373.4  # N
-M_x = 0  # Nm
+M_x = 137.3  # Nm
 M_y = 0  # Nm
-M_z = 0  # Nm
+M_z = 49.05  # Nm
 # Geometry m
 
+w = 0.025
 W = 0.03
-D_1 = 0.02
+D_1 = 0.005
 t_1 = 0.2
 e = W / 2  # distance center of D_1 to the end of the flange (currently a circular end)
 l = 0.1  # flange length
@@ -488,7 +489,7 @@ a = load_check(
 
 
 def volume(vars):
-    W, D_1, t_1, le = vars
+    W, t_1, le = vars
     return W * le * t_1 + 0.5 * np.pi * (W**2 / 4) * t_1 - np.pi * (D_1**2 / 4) * t_1
 
 
@@ -505,15 +506,14 @@ constraints = [
     {"type": "ineq", "fun": constraint_le_gt_D1},
     {"type": "ineq", "fun": constraint_sigma_bolt_shear},
 ]
-bounds = [(0.0005, None), (0.0005, None), (0.00001, None), (0.0005, None)]
-x0 = [0.006, 0.005, 0.0001, 0.0006]
+bounds = [(0.0005, None), (0.00001, None), (0.0005, None)]
+x0 = [0.04, 0.015, 0.015]
 result = minimize(volume, x0, method="SLSQP", bounds=bounds, constraints=constraints)
 print("Optimization success:", result.success)
 print("Minimum volume =", result.fun)
 print("W = ", result.x[0])
-print("D_1 = ", result.x[1])
-print("t_1 = ", result.x[2])
-print("le = ", result.x[3])
+print("t_1 = ", result.x[1])
+print("le = ", result.x[2])
 print(result.fun * flanges * material_properties[material]["density"])
 print("F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c ")
 print(
@@ -529,10 +529,10 @@ print(
         M_y,
         M_z,
         result.x[0],
+        D_1,
         result.x[1],
-        result.x[2],
         result.x[0] / 2,
-        result.x[3],
+        result.x[2],
         curve_Kty,
     )
 )
@@ -546,9 +546,41 @@ A_3 = A_2
 A_4 = A_1
 Av = 6 / (3 / A_1 + 1 / A_2 + 1 / A_3 + 1 / A_4)
 
-ratio = Av / (result.x[1] * result.x[2])  # area ratio
+ratio = Av / (D_1 * result.x[1])  # area ratio
 print("Av = ", Av)
 print("ratio = ", ratio)
 print(
-    f"W_D = {result.x[0] / result.x[1]}\nt_D = {result.x[3] / result.x[1]}\ne_D = {result.x[0] / (2 * result.x[1])}\nK_t = {Kt(curve_Kt, result.x[0] / result.x[1])}\nK_Bry = {K_Bry(result.x[3] / result.x[1], result.x[0] / (2 * result.x[1]))}\nK_ty = {K_ty(curve_Kty, ratio)}"
+    f"W_D = {result.x[0] / D_1}\nt_D = {result.x[2] / D_1}\ne_D = {result.x[0] / (2 * D_1)}\nK_t = {Kt(curve_Kt, result.x[0] / D_1)}\nK_Bry = {K_Bry(result.x[2] / D_1, result.x[0] / (2 * result.x[1]))}\nK_ty = {K_ty(curve_Kty, ratio)}"
 )
+
+
+F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
+        material,
+        curve_Kt,
+        flanges,
+        c,
+        F_x,
+        F_y,
+        F_z,
+        M_x,
+        M_y,
+        M_z,
+        result.x[0],
+        D_1,
+        result.x[1],
+        result.x[0] / 2,
+        result.x[2],
+        curve_Kty,
+    )
+
+M_a = F_c * result.x[2] + M_x / flanges  # moment per flange
+M_c = F_x * result.x[2] + M_z / flanges
+
+I_xx = (1 / 12) * result.x[1] * (w**3)  # moment of Inertia
+I_zz = (1 / 12) * w * (result.x[1]**3)
+
+sigma_root = (F_b / (w * result.x[1]) + (M_a * (w / 2)) / I_xx + (M_c * (result.x[1] / 2)) / I_zz)
+
+MS = material_properties[material]["sigma_y"]/sigma_root  -1
+print(MS)
+
