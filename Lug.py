@@ -100,28 +100,38 @@ def interpolation(filename, i=0, j=1):
     y = np.array(y_vals)
 
     # create interpolation function
-    f = interp1d(x, y, kind="cubic", fill_value="extrapolate")
+    #f = interp1d(x, y, kind="cubic", fill_value="extrapolate")
 
-    return f
+    coeffs = np.polyfit(x, y, 9)
+    
+
+    return coeffs
 
 
 def Kt(curve, W_D):
     if curve == "Curve 1":
         f_interp = interpolation("Kt Curves.csv", 0, 1)
+        K_t = np.polyval( f_interp, W_D)
     if curve == "Curve 2":
         f_interp = interpolation("Kt Curves.csv", 2, 3)
+        K_t = np.polyval( f_interp, W_D)
     if curve == "Curve 3":
         f_interp = interpolation("Kt Curves.csv", 4, 5)
+        K_t = np.polyval( f_interp, W_D)
     if curve == "Curve 4":
         f_interp = interpolation("Kt Curves.csv", 6, 7)
+        K_t = np.polyval( f_interp, W_D)
     if curve == "Curve 5":
         f_interp = interpolation("Kt Curves.csv", 8, 9)
+        K_t = np.polyval( f_interp, W_D)
     if curve == "Curve 6":
         f_interp = interpolation("Kt Curves.csv", 10, 11)
+        K_t = np.polyval( f_interp, W_D)
     if curve == "Curve 7":
         f_interp = interpolation("Kt Curves.csv", 12, 13)
+        K_t = np.polyval( f_interp, W_D)
 
-    K_t = f_interp(W_D)
+    
 
     return K_t
 
@@ -129,31 +139,31 @@ def Kt(curve, W_D):
 def K_Bry(t_D, e_D):
     if t_D <= 0.07:
         f_interp = interpolation("K_bry Curves.csv", 0, 1)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     elif t_D <= 0.09:
         f_interp = interpolation("K_bry Curves.csv", 2, 3)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     elif t_D <= 0.11:
         f_interp = interpolation("K_bry Curves.csv", 4, 5)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     elif t_D <= 0.135:
         f_interp = interpolation("K_bry Curves.csv", 6, 7)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     elif t_D <= 0.175:
         f_interp = interpolation("K_bry Curves.csv", 8, 9)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     elif t_D <= 0.25:
         f_interp = interpolation("K_bry Curves.csv", 10, 11)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     elif t_D <= 0.35:
         f_interp = interpolation("K_bry Curves.csv", 12, 13)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     elif t_D <= 0.5:
         f_interp = interpolation("K_bry Curves.csv", 14, 15)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
     else:
         f_interp = interpolation("K_bry Curves.csv", 16, 17)
-        K_bry = f_interp(e_D)
+        K_bry = np.polyval( f_interp, e_D)
 
     return K_bry
 
@@ -161,46 +171,46 @@ def K_Bry(t_D, e_D):
 def K_ty(curve, Av_Abr):
     if curve == "Curve 1":
         f_interp = interpolation("K_ty Curves.csv", 0, 1)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 2":
         f_interp = interpolation("K_ty Curves.csv", 2, 3)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 3":
         f_interp = interpolation("K_ty Curves.csv", 4, 5)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 4":
         f_interp = interpolation("K_ty Curves.csv", 6, 7)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 5":
         f_interp = interpolation("K_ty Curves.csv", 8, 9)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 6":
         f_interp = interpolation("K_ty Curves.csv", 10, 11)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 7":
         f_interp = interpolation("K_ty Curves.csv", 12, 13)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 8":
         f_interp = interpolation("K_ty Curves.csv", 14, 15)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 9":
         f_interp = interpolation("K_ty Curves.csv", 16, 17)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 10":
         f_interp = interpolation("K_ty Curves.csv", 18, 19)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 11":
         f_interp = interpolation("K_ty Curves.csv", 20, 21)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 12":
         f_interp = interpolation("K_ty Curves.csv", 22, 23)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 13":
         f_interp = interpolation("K_ty Curves.csv", 24, 25)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     if curve == "Curve 14":
         f_interp = interpolation("K_ty Curves.csv", 26, 27)
-        Kty = f_interp(Av_Abr)
+        Kty = np.polyval( f_interp, Av_Abr)
     return Kty
 
 
@@ -259,18 +269,18 @@ def load_check(
     P_tu = (
         Kt(curve_Kt, W_D) * F_tu * t_1 * (W - D_1) * c
     )  # force it can take per failure condition
-    P_Bry = K_Bry(t_D, e_D) * F_tu * D_1 * t_1
+    P_Bry = K_Bry(t_D, e_D) * F_ty * D_1 * t_1
     P_ty = K_ty(curve_Kty, ratio) * F_ty * D_1 * t_1
 
-    F_shear_max = (F_b**2 + F_c**2)**(1/2)
-    sigma_bolt_shear = F_shear_max / (2 * np.pi * ((D_1 / 2)**2))
+    F_shear_max = (F_b**2 + F_c**2) ** (1 / 2)
+    sigma_bolt_shear = F_shear_max / (2 * np.pi * ((D_1 / 2) ** 2))
 
-    return F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c
+    return F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear
 
 
 def constraint_1(vars):
     W, D_1, t_1, le = vars
-    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c = load_check(
+    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
         material,
         curve_Kt,
         flanges,
@@ -293,7 +303,7 @@ def constraint_1(vars):
 
 def constraint_2(vars):
     W, D_1, t_1, le = vars
-    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c = load_check(
+    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
         material,
         curve_Kt,
         flanges,
@@ -316,7 +326,7 @@ def constraint_2(vars):
 
 def constraint_3(vars):
     W, D_1, t_1, le = vars
-    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c = load_check(
+    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
         material,
         curve_Kt,
         flanges,
@@ -339,7 +349,7 @@ def constraint_3(vars):
 
 def constraint_4(vars):
     W, D_1, t_1, le = vars
-    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c = load_check(
+    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
         material,
         curve_Kt,
         flanges,
@@ -368,27 +378,50 @@ def constraint_5(vars):
 
 def constraint_6(vars):
     W, D_1, t_1, le = vars
-    return W * le * t_1 + 0.5 * np.pi * (W**2 / 4) * t_1 - np.pi * D_1**2 / 4 * t_1
+    return W * le * t_1 + 0.5 * np.pi * (W**2 / 4) * t_1 - np.pi * (D_1**2 / 4) * t_1
 
 
 def constraint_thickness_gt_width(vars):
     W, D_1, t_1, le = vars
-    return W - 3 * t_1 - 0.001
+    return W - t_1 - 0.001
 
 
 def constraint_A1_positive(vars):
     W, D_1, t_1, le = vars
-    return t_1 * (W / 2 + D_1 / 2 * np.sin(np.pi / 4))
+    return  (W / 2 -( D_1 / 2 ) * np.sin(np.pi / 4))
 
 
 def constraint_A2_positive(vars):
     W, D_1, t_1, le = vars
-    return t_1 * (W / 2 - D_1 / 2)
+    return  (W / 2 - D_1 / 2)
 
 
 def constraint_le_gt_D1(vars):
     W, D_1, t_1, le = vars
     return le - D_1 - 0.005
+
+
+def constraint_sigma_bolt_shear(vars):
+    W, D_1, t_1, le = vars
+    F_ty, sigma_max_root, P_tu, P_Bry, F_b, P_ty, F_c, sigma_bolt_shear = load_check(
+        material,
+        curve_Kt,
+        flanges,
+        c,
+        F_x,
+        F_y,
+        F_z,
+        M_x,
+        M_y,
+        M_z,
+        W,
+        D_1,
+        t_1,
+        e,
+        le,
+        curve_Kty,
+    )
+    return material_properties[material]["shear"] * c - sigma_bolt_shear
 
 
 # F_x = 15000  # N
@@ -405,9 +438,9 @@ def constraint_le_gt_D1(vars):
 # M_y = 0  # Nm
 # M_z = 0  # Nm
 
-F_x = 1594.125  # N
-F_y = 1594.125  # N
-F_z = 1594.125  # N
+F_x = 490.5  # N
+F_y = 490.5  # N
+F_z = 1373.4  # N
 M_x = 0  # Nm
 M_y = 0  # Nm
 M_z = 0  # Nm
@@ -456,7 +489,7 @@ a = load_check(
 
 def volume(vars):
     W, D_1, t_1, le = vars
-    return W * le * t_1 + 0.5 * np.pi * (W**2 / 4) * t_1 - np.pi * D_1**2 / 4 * t_1
+    return W * le * t_1 + 0.5 * np.pi * (W**2 / 4) * t_1 - np.pi * (D_1**2 / 4) * t_1
 
 
 constraints = [
@@ -470,6 +503,7 @@ constraints = [
     {"type": "ineq", "fun": constraint_A1_positive},
     {"type": "ineq", "fun": constraint_A2_positive},
     {"type": "ineq", "fun": constraint_le_gt_D1},
+    {"type": "ineq", "fun": constraint_sigma_bolt_shear},
 ]
 bounds = [(0.0005, None), (0.0005, None), (0.00001, None), (0.0005, None)]
 x0 = [0.006, 0.005, 0.0001, 0.0006]
