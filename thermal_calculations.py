@@ -3,11 +3,11 @@ import math
 # ===============================
 # Assumed material and geometry
 # ===============================
-thermal_coefficient_lug = 2e-5  # 1/K placeholder
-thermal_coefficient_bolt = 1e-5  # 1/K placeholder
-fastener_youngs_modulus = 50e9  # Pa placeholder
-backplate_youngs_modulus = 50e9  # Pa placeholder
-skin_youngs_modulus = 50e9  # Pa placeholder
+thermal_coefficient_lug = 2.3e-5  # 1/K
+thermal_coefficient_fastener = 1.75e-5  # 1/K
+fastener_youngs_modulus = 193e9  # Pa
+backplate_youngs_modulus = 72.4e9  # Pa
+skin_youngs_modulus = 72.4e9  # Pa
 
 backplate_thickness = 0.002  # m
 skin_thickness = 0.002  # m
@@ -19,17 +19,17 @@ total_thickness = backplate_thickness + skin_thickness
 
 # Fastener geometry: [length, radius]
 fastener_geometry_list = [
-    [0.01, 0.0035],
+    [0.0035, 0.004],
     [0.004, 0.0025],
-    [0.01, 0.0035]
-] # placeholder
+    [0.0035, 0.004]
+]
 
 integration_steps = 10000  # numerical integration steps
 
 # ===============================
 # Temperature conditions
 # ===============================
-assembly_temperature = 280.5  # K placeholder
+assembly_temperature = 290  # K placeholder
 min_temp = 263  # K
 max_temp = 298  # K
 
@@ -89,7 +89,8 @@ for i in range(integration_steps):
 
     # Increment compliance
     compliance_clamped_part += step_size / (E * math.pi * r ** 2)
-
+print(compliance_clamped_part)
+print(compliance_fastener)
 # ===============================
 # Calculate forces on fasteners
 # ===============================
@@ -98,6 +99,6 @@ for fastener in fastener_geometry_list:
     total_bolt_length += fastener[0]
 
 for delta_t in delta_t_list:
-    force = total_bolt_length * (thermal_coefficient_lug - thermal_coefficient_bolt) * delta_t
+    force = total_bolt_length * (thermal_coefficient_lug - thermal_coefficient_fastener) * delta_t
     force = force / (compliance_fastener + compliance_clamped_part)
     print("ΔT = ", delta_t, "K, Force = ", force, "N")
