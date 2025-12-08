@@ -1,11 +1,13 @@
 import math
+from fastener_calculations import *
+
 
 # ===============================
 # Assumed material and geometry
 # ===============================
 thermal_coefficient_lug = 2e-5  # 1/K
 thermal_coefficient_bolt = 1e-5  # 1/K
-fastener_youngs_modulus = 50e9  # Pa
+fastener_youngs_modulus = 193e9  # Pa
 backplate_youngs_modulus = 50e9  # Pa
 skin_youngs_modulus = 50e9  # Pa
 
@@ -17,11 +19,33 @@ bolt_distance_to_edge = 0.2  # m
 
 total_thickness = backplate_thickness + skin_thickness
 
-# Fastener geometry: [length, radius]
+
+
+
+# ===========================
+# Fastener Geometry
+# ===========================
+
+
+d_nominal = 0.005
+d_minor = 4.134e-3 # https://www.accu.co.uk/p/117-iso-metric-thread-dimensions
+
+L_h_sub   = 3.5e-3 #m
+L_eng_sub  = 3e-3  #m
+L_n_sub   =  3.5e-3  #m
+L_shank = 4e-3  #m (t2+t3)
+
+d_h_sub = 8e-3 #m
+d_eng_sub = 5e-3 #m
+d_n_sub = 8e-3 #m
+
+
+
 fastener_geometry_list = [
-    [0.01, 0.003],
-    [0.02, 0.002],
-    [0.01, 0.003]
+    [L_shank, d_nominal/2],
+    [L_h_sub, d_h_sub/2],
+    [L_eng_sub, d_eng_sub/2],
+    [L_n_sub, d_n_sub/2]
 ]
 
 integration_steps = 100000  # numerical integration steps
@@ -100,3 +124,12 @@ for delta_t in delta_t_list:
     force = total_bolt_length * (thermal_coefficient_lug - thermal_coefficient_bolt) * delta_t
     force = force / (compliance_fastener + compliance_clamped_part)
     print("ΔT = ", delta_t, "K, Force = ", force, "N")
+
+
+
+# ===============================
+# Force Ratio Function
+# ===============================
+
+def force_ratio(compliance_fastener, compliance_clamped_part):
+    return compliance_fastener / (compliance_fastener + compliance_clamped_part)
