@@ -29,7 +29,7 @@ integration_steps = 10000  # numerical integration steps
 # ===============================
 # Temperature conditions
 # ===============================
-assembly_temperature = 290  # K placeholder
+assembly_temperature = 290  # K
 min_temp = 263  # K
 max_temp = 298  # K
 
