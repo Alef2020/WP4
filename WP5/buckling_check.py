@@ -6,42 +6,49 @@
 #importing packages
 import math
 import scipy.optimize as opt
-import colorama
-colorama.init()
-global area_moment_of_inertia
-
-
+#importing other python files
+from materials import *
+material = MaterialProperties(0,0,0,0,0,0)
 
 
 #defining functions as specified in WP5
-def get_euler_column_buckling_stress(youngs_modulus,area_moment_of_inertia,area,length):
+def get_euler_column_buckling_stress(params, youngs_modulus = material.Youngs_modulus):
+    radius,thickness,length,pressure,applied_force = params
+    area_moment_of_inertia = math.pi/64 * ((radius+thickness)**2-radius**2)
+    area = 2*math.pi*radius*thickness
     return math.pi**2 * youngs_modulus * area_moment_of_inertia/(area*length**2)
 
-def get_shell_buckling_stress(youngs_modulus,length,outside_pressure,radius,thickness,internal_pressure,poisson_ratio):
+def get_shell_buckling_stress(params, youngs_modulus = material.Youngs_modulus,poisson_ratio = material.poisson_ratio):
+    radius, thickness, length, pressure, applied_force = params
     def get_k(_lambda):
         return _lambda + 12/(math.pi**4) * length**4/(radius**2 * thickness**2) * (1-poisson_ratio**2)/_lambda
     k = opt.minimize_scalar(get_k).fun
-    minimum_pressure_difference = internal_pressure - outside_pressure
-    q = minimum_pressure_difference/youngs_modulus * (radius/thickness)**2
+    q = pressure/youngs_modulus * (radius/thickness)**2
     return (1.983-0.983*math.e**(-23.14*q))*k*math.pi**2*youngs_modulus/(12*(1-poisson_ratio**2))*(thickness/length)**2
 
 # finding safety margin for both types of buckling
-def get_euler_column_buckling_safety_margin(youngs_modulus,area_moment_of_inertia,area,length,applied_force,):
-    def check()
+def get_euler_column_buckling_safety_margin(params, youngs_modulus = material.Youngs_modulus):
+    radius, thickness, length, pressure, applied_force = params
+    area_moment_of_inertia = math.pi/64 * ((radius+thickness)**2-radius**2)
+    area = 2*math.pi*radius*thickness
     applied_stress = applied_force/area
     return applied_stress/get_euler_column_buckling_stress(youngs_modulus,area_moment_of_inertia,area,length)-1
 
-def get_shell_buckling_safety_margin(youngs_modulus,length,outside_pressure,radius,thickness,internal_pressure,poisson_ratio,applied_force):
-    applied_stress = applied_force/area
-    return applied_stress/get_shell_buckling_stress(youngs_modulus,length,outside_pressure,radius,thickness,internal_pressure,poisson_ratio)-1
+def get_shell_buckling_safety_margin(params, youngs_modulus = material.Youngs_modulus,poisson_ratio = material.poisson_ratio):
+    radius, thickness, length, pressure, applied_force = params
+    applied_stress = applied_force/(2*math.pi*radius*thickness) # area found using thin-wall assumption
+    return applied_stress/get_shell_buckling_stress(params,youngs_modulus,poisson_ratio)-1
 
 # gives all buckling information at once in a dictionary
-def get_minimum_buckling_safety_margin(youngs_modulus,area_moment_of_inertia,area,length,outside_pressure,radius,thickness,internal_pressure,poisson_ratio,applied_force):
-    euler_column_buckling_stress = get_euler_column_buckling_stress(youngs_modulus,area_moment_of_inertia,area,length)
-    euler_column_buckling_safety_margin = get_euler_column_buckling_safety_margin(youngs_modulus,area_moment_of_inertia,area,length,applied_force)
+def get_minimum_buckling_safety_margin(params, youngs_modulus = material.Youngs_modulus,poisson_ratio=material.poisson_ratio):
+    radius, thickness, length, pressure, applied_force = params
+    area_moment_of_inertia = math.pi / 64 * ((radius + thickness) ** 2 - radius ** 2)
+    area = 2 * math.pi * radius * thickness
+    euler_column_buckling_stress = get_euler_column_buckling_stress(params, youngs_modulus)
+    euler_column_buckling_safety_margin = get_euler_column_buckling_safety_margin(params, youngs_modulus)
 
-    shell_buckling_stress = get_shell_buckling_stress(youngs_modulus,length,outside_pressure,radius,thickness,internal_pressure,poisson_ratio)
-    shell_buckling_safety_margin = get_shell_buckling_safety_margin(youngs_modulus,length,outside_pressure,radius,thickness,internal_pressure,poisson_ratio,applied_force)
+    shell_buckling_stress = get_shell_buckling_stress(params, youngs_modulus,poisson_ratio)
+    shell_buckling_safety_margin = get_shell_buckling_safety_margin(params, youngs_modulus,poisson_ratio)
 
     minimum_buckling_stress = min(euler_column_buckling_stress,shell_buckling_stress)
     minimum_buckling_safety_margin = min(euler_column_buckling_safety_margin,shell_buckling_safety_margin)
@@ -56,7 +63,7 @@ def get_minimum_buckling_safety_margin(youngs_modulus,area_moment_of_inertia,are
 
     #prints minimum safety margin in color
     if minimum_buckling_safety_margin < 0:
-        print(Fore.red + "Minimum safety margin: " + str(minimum_buckling_safety_margin) + Style.RESET_ALL)
+        print("\033[91mMinimum safety margin: " + str(minimum_buckling_safety_margin))
     else:
-        print(Fore.green + "Minimum safety margin " + str(minimum_buckling_safety_margin) + Style.RESET_ALL)
+        print("\033[92mMinimum safety margin " + str(minimum_buckling_safety_margin))
     return buckling_dictionary
