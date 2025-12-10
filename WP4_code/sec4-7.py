@@ -29,4 +29,4 @@ pos = [
 
 design = design_Configuration(pos, Total_load_cases, 0.05, 0.025, 0.002, 0.002, m2014_T6, Alumunium, Stainless_M5X30)
 
-print(design.FastenerList[3].load_cases[0].Force_Y)
+print(design.FastenerList[0].load_cases[0].Force_Y, design.load_cases[0].Moment_X)

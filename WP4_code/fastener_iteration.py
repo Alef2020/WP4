@@ -11,8 +11,8 @@ def pull_through_check(params):
     design_option = get_design(params)
     for fastener in design_option.FastenerList:
         config = fastener.configuration
-        F_1 = math.pi*config.d_h*design_option.t_2 * design_option.material.shear #Force required to pull through head through lug plate
-        F_2 = math.pi*config.d_n*design_option.t_3 * design_option.material_wall.shear #Force required to pull through nut through mounting plate
+        F_1 = math.pi*(config.d_h-config.d_i)*design_option.t_2 * design_option.material.shear #Force required to pull through head through lug plate
+        F_2 = math.pi*(config.d_n-config.d_i)*design_option.t_3 * design_option.material_wall.shear #Force required to pull through nut through mounting plate
         F_max  = min(F_1, F_2)
         for LC in fastener.load_cases:
             if F_max > abs(LC.Force_Y):
@@ -22,21 +22,16 @@ def pull_through_check(params):
 #This function checks for bearing deformation
 def bearing_check(params):
     design = get_design(params)
-    failure_list = []
     for fastener in design.FastenerList:
         for LC in fastener.load_cases:
             P_i = math.sqrt(LC.Force_X**2 + LC.Force_Z**2)
             sigma_lug = P_i / (fastener.configuration.d_s * design.t_2)
             sigma_wall = P_i / (fastener.configuration.d_s * design.t_3)
             if sigma_lug > design.material.stress_yield:
-                failure_list.append((fastener.position, "Lug Failure"))
+                return 1
             elif sigma_wall > design.material_wall.stress_yield:
-                failure_list.append((fastener.position, "Wall Failure")) 
-
-    if len(failure_list) > 0:
-        return 1
-    else:
-        return 0
+                return 1 
+    return 0
     
 #To get the maximum cost for 
 def Max_cost_condition(design):
@@ -70,12 +65,12 @@ for bolt in Bolt_lst:
         constraints = [
             {'type': 'eq', 'fun': bearing_check},
 #            {'type': 'eq', 'fun': pull_through_check}
-        ]
+        ] 
 
         result = minimize( 
             f, 
-            [0.5, bolt.d_s*5.5, 0.1],
-            bounds=[(0.05 , 10), (bolt.d_s*5,10), (0.002,10)], 
+            [0.010, bolt.d_s*5.5, 0.01],
+            bounds=[(0.05 , 0.4), (bolt.d_s*5,bolt.d_s*6), (0.002,0.2)], 
             method='COBYLA', 
             constraints=constraints,
             options={'disp': True}
@@ -83,7 +78,7 @@ for bolt in Bolt_lst:
         
         par = result.x[0],result.x[1],result.x[2]
         mass = get_design(par).mass()
-        mat_result.append([result.x, mass,result.success])
+        mat_result.append([result.x, mass,result.success, bolt, Mat])
     Results.append(mat_result)
 
 print("Mass data: \n")
@@ -94,8 +89,7 @@ for result_row in Results:
     print(row)
 
 
-def pull_through_check_data(params):
-    design_option = get_design(params)
+def pull_through_check_data(design_option):
     data = []
     for fastener in design_option.FastenerList:
         config = fastener.configuration
@@ -108,8 +102,7 @@ def pull_through_check_data(params):
     return (min(data))
 
 #This function checks for bearing deformation
-def bearing_check_data(params):
-    design = get_design(params)
+def bearing_check_data(design):
     data = []
     for fastener in design.FastenerList:
         for LC in fastener.load_cases:
@@ -128,10 +121,21 @@ for result_row in Results:
     row = ""
     for optimal in result_row:
         params = optimal[0][0], optimal[0][1], optimal[0][2]
-        bcd = bearing_check_data(params)
-        ptcd = pull_through_check_data(params)
-        row += f"|| {bcd[0]:.1f}, {bcd[1]:.1f}, {ptcd[0]:.1f}, {ptcd[1]:.1f} ||"
-    print(row)
+        boltype = optimal[3]
+        mat = optimal[4]
+        w ,h, t2 = params 
+        e = boltype.d_s*1.5 #distance from edge to center of fastener should be defined based on fastener size
+        fastener_positions = [
+            [ w/2-e, 0,  h/2-e],
+            [-w/2+e, 0,  h/2-e],
+            [ w/2-e, 0, -h/2+e],
+            [-w/2+e, 0, -h/2+e],
+        ]
+        design_option = design_Configuration(fastener_positions, Total_load_cases, width = w, height = h, t_2 = t2, t_3 = 0.002, Material=mat, fastener_config = boltype)
+        bcd = bearing_check_data(design_option)
+        ptcd = pull_through_check_data(design_option)
+        row += f"|| {bcd[0]:.3f}, {bcd[1]:.3f}, {ptcd[0]:.3f}, {ptcd[1]:.3f} ||\n" if optimal[2] else "  -  ,"
+    print(row, "\n \n")
 
 
 run = True
