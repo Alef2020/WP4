@@ -8,7 +8,7 @@ import math
 import scipy.optimize as opt
 #importing other python files
 from materials import *
-material = MaterialProperties(0,0,0,0,0,0)
+material = MaterialProperties(0,0,0,0)
 
 
 #defining functions as specified in WP5
@@ -32,7 +32,7 @@ def get_euler_column_buckling_safety_margin(params, youngs_modulus = material.Yo
     area_moment_of_inertia = math.pi/64 * ((radius+thickness)**2-radius**2)
     area = 2*math.pi*radius*thickness
     applied_stress = applied_force/area
-    return applied_stress/get_euler_column_buckling_stress(youngs_modulus,area_moment_of_inertia,area,length)-1
+    return applied_stress/get_euler_column_buckling_stress(params, youngs_modulus)-1
 
 def get_shell_buckling_safety_margin(params, youngs_modulus = material.Youngs_modulus,poisson_ratio = material.poisson_ratio):
     radius, thickness, length, pressure, applied_force = params
