@@ -25,7 +25,7 @@ poisson_ratio=material.poisson_ratio
 #defining functions as specified in WP5
 def get_euler_column_buckling_stress(params):
     radius,thickness,length = params
-    area_moment_of_inertia = math.pi/64 * ((radius+thickness)**4-radius**4)
+    area_moment_of_inertia = math.pi/4 * ((radius+thickness)**4-radius**4)
     area = 2*math.pi*radius*thickness
     return math.pi**2 * youngs_modulus * area_moment_of_inertia/(area*length**2)
 
@@ -39,15 +39,15 @@ def get_shell_buckling_stress(params):
 # finding safety margin for both types of buckling
 def get_euler_column_buckling_safety_margin(params):
     radius, thickness, length = params
-    area_moment_of_inertia = math.pi/64 * ((radius+thickness)**4-radius**4)
+    area_moment_of_inertia = math.pi/4 * ((radius+thickness)**4-radius**4)
     area = 2*math.pi*radius*thickness
     applied_stress = applied_force/area
-    return applied_stress/get_euler_column_buckling_stress(params)-1
+    return get_euler_column_buckling_stress(params)/applied_stress-1
 
 def get_shell_buckling_safety_margin(params):
     radius, thickness, length = params
     applied_stress = applied_force/(2*math.pi*radius*thickness) # area found using thin-wall assumption
-    return applied_stress/get_shell_buckling_stress(params)-1
+    return get_shell_buckling_stress(params)/applied_stress-1
 
 # gives all buckling information at once in a dictionary
 def get_minimum_buckling_safety_margin(params):
