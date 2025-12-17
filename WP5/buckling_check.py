@@ -25,22 +25,21 @@ poisson_ratio=material.poisson_ratio
 #defining functions as specified in WP5
 def get_euler_column_buckling_stress(params):
     radius,thickness,length = params
-    area_moment_of_inertia = math.pi/64 * ((radius+thickness)**2-radius**2)
+    area_moment_of_inertia = math.pi/64 * ((radius+thickness)**4-radius**4)
     area = 2*math.pi*radius*thickness
     return math.pi**2 * youngs_modulus * area_moment_of_inertia/(area*length**2)
 
 def get_shell_buckling_stress(params):
     radius, thickness, length = params
-    def get_k(_lambda):
-        return _lambda + 12/(math.pi**4) * length**4/(radius**2 * thickness**2) * (1-poisson_ratio**2)/_lambda
-    k = opt.minimize_scalar(get_k).fun
+    k = 4*(length**2)*math.sqrt(3-3*(poisson_ratio**2))/((math.pi**2)*radius*thickness) #I solved it analytically bcs it was giving errors
     q = pressure/youngs_modulus * (radius/thickness)**2
-    return (1.983-0.983*math.e**(-23.14*q))*k*math.pi**2*youngs_modulus/(12*(1-poisson_ratio**2))*(thickness/length)**2
+    return (1.983-0.983*math.exp(-23.14*q))*k*(math.pi**2)*youngs_modulus/(12*(1-(poisson_ratio**2)))*((thickness/length)**2)
+
 
 # finding safety margin for both types of buckling
 def get_euler_column_buckling_safety_margin(params):
     radius, thickness, length = params
-    area_moment_of_inertia = math.pi/64 * ((radius+thickness)**2-radius**2)
+    area_moment_of_inertia = math.pi/64 * ((radius+thickness)**4-radius**4)
     area = 2*math.pi*radius*thickness
     applied_stress = applied_force/area
     return applied_stress/get_euler_column_buckling_stress(params)-1
@@ -53,7 +52,7 @@ def get_shell_buckling_safety_margin(params):
 # gives all buckling information at once in a dictionary
 def get_minimum_buckling_safety_margin(params):
     radius, thickness, length = params
-    area_moment_of_inertia = math.pi / 64 * ((radius + thickness) ** 2 - radius ** 2)
+    area_moment_of_inertia = math.pi / 64 * ((radius + thickness) ** 4 - radius ** 4)
     area = 2 * math.pi * radius * thickness
     euler_column_buckling_stress = get_euler_column_buckling_stress(params)
     euler_column_buckling_safety_margin = get_euler_column_buckling_safety_margin(params)
